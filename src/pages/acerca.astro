@@ -13,11 +13,11 @@ const fuentes = [
 <Base title="Fuentes y método" description="Qué fuentes oficiales usa Vivienda ES y cómo se actualiza cada día.">
   <div class="mx-auto max-w-2xl pt-8 sm:pt-14">
     <p class="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-accent">Método</p>
-    <h1 class="mt-3 font-serif text-[2.4rem] font-medium leading-[1.05] tracking-[-0.025em] sm:text-5xl">Fuentes y método</h1>
+    <h1 class="mt-3 font-display text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl">Fuentes y método</h1>
     <p class="mt-4 text-lg leading-relaxed text-ink-2 text-pretty">
       Cada novedad procede de una fuente oficial y enlaza al documento original. Si un dato no tiene enlace oficial verificable, no se publica: el build del sitio falla si a una novedad le falta <code class="rounded bg-ink/5 px-1 py-0.5 text-[0.9em]">fuente_url</code> o si su dominio no está en la lista de fuentes oficiales.
     </p>
-    <h2 class="mt-12 font-serif text-2xl font-medium tracking-tight">Fuentes</h2>
+    <h2 class="mt-12 font-display text-2xl font-semibold tracking-tight">Fuentes</h2>
     <ul class="mt-4 grid gap-3 sm:grid-cols-2">
       {fuentes.map(([nombre, corto, url, desc]) => (
         <li>
@@ -29,7 +29,7 @@ const fuentes = [
         </li>
       ))}
     </ul>
-    <h2 class="mt-12 font-serif text-2xl font-medium tracking-tight">Actualización diaria</h2>
+    <h2 class="mt-12 font-display text-2xl font-semibold tracking-tight">Actualización diaria</h2>
     <p class="mt-3 text-[1.05rem] leading-relaxed text-ink-2 text-pretty">
       Una tarea programada revisa cada día el BOE, el Congreso, el Senado y el Ministerio de Vivienda, añade las novedades nuevas como ficheros versionados en git y publica el sitio. El resumen de cada novedad es una síntesis; el texto que vale es siempre el de la fuente oficial.
     </p>

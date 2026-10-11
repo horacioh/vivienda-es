@@ -1,10 +1,11 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
-@import "@fontsource-variable/newsreader/opsz.css";
+@import "@fontsource-variable/inter-tight/wght.css";
+@import "@fontsource-variable/inter-tight/wght-italic.css";
 
 @theme {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "Newsreader Variable", ui-serif, Georgia, "Times New Roman", serif;
+  --font-display: "Inter Tight Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --color-ink: #17140f;
   --color-ink-2: #3f3a33;
   --color-muted: #736a5f;
