@@ -12,8 +12,10 @@ encontrar el documento oficial).
 
 ```bash
 git checkout main && git pull --ff-only
-bun install --frozen-lockfile
 ```
+
+No instales dependencias todavía: `scripts/fetch-boe.ts` no las necesita. Instálalas solo en el paso 4,
+si hay algo que publicar.
 
 Calcula la ventana (hora de Madrid): empieza en la **más antigua** de estas dos fechas —la `fecha`
 más reciente en `src/content/novedades/` (incluida, para recoger lo publicado más tarde ese mismo
@@ -22,12 +24,19 @@ días intermedios. La deduplicación del paso 3 evita repetir lo que ya existe.
 
 ## 1. Fuentes a consultar (en este orden)
 
-Usa un User-Agent de navegador: congreso.es, senado.es y mivau.gob.es devuelven 403 sin él.
+Usa un User-Agent de navegador: congreso.es y mivau.gob.es devuelven 403 sin él. Si un dominio sigue
+devolviendo 403 con el User-Agent, **no reintentes ni busques rodeos**: anótalo en el resumen y sigue.
+
+Las fuentes 1, 2 y 4 se consultan **cada día**. Senado (3) y partidos (5) solo los **lunes** (hora de
+Madrid), con la ventana de la semana anterior.
 
 1. **BOE** — https://www.boe.es
    - Ayudante: `bun run scripts/fetch-boe.ts <desde AAAA-MM-DD> <hasta AAAA-MM-DD>` lista los
      ítems del sumario (API `https://www.boe.es/datosabiertos/api/boe/sumario/AAAAMMDD`) cuyo título
      o departamento menciona vivienda, alquiler, arrendamiento, desahucios, suelo, urbanismo, etc.
+     Por defecto ya descarta las secciones II (nombramientos, oposiciones) y V (anuncios,
+     contratación) y los recursos de la DGSJFP contra calificaciones registrales; añade `--todo` solo
+     si sospechas que falta algo.
    - El filtro es amplio a propósito: **revisa cada ítem** y quédate solo con lo relevante para la
      política de vivienda (leyes, reales decretos-leyes, reales decretos, leyes autonómicas, ayudas,
      planes, resoluciones de las Cortes). Descarta oposiciones, nombramientos, anuncios de registros,
@@ -41,13 +50,17 @@ Usa un User-Agent de navegador: congreso.es, senado.es y mivau.gob.es devuelven 
    - Iniciativas (datos abiertos): https://www.congreso.es/es/opendata/iniciativas —
      `ProposicionesDeLey__*.json` (campo `AUTOR` = grupo parlamentario, `ENLACESBOCG` = PDF oficial
      del BOCG). Busca nuevas proposiciones de ley de vivienda y cambios de `SITUACIONACTUAL`.
-3. **Senado** — https://www.senado.es (actividad parlamentaria, iniciativas y votaciones).
+3. **Senado** (solo lunes) — https://www.senado.es (actividad parlamentaria, iniciativas y
+   votaciones). Desde la VM de Devin suele devolver 403 incluso con User-Agent; si es así, sáltalo.
 4. **Ministerio de Vivienda y Agenda Urbana** — https://www.mivau.gob.es/el-ministerio/sala-de-prensa/noticias
    (solo noticias de política de vivienda; ignora exposiciones, premios de arquitectura y actos
    culturales). También https://www.lamoncloa.gob.es (referencias del Consejo de Ministros).
-5. **Partidos políticos** — solo sus webs oficiales (dominios en `src/lib/fuentes.ts`): propuestas o
+5. **Partidos políticos** (solo lunes) — solo sus webs oficiales (dominios en `src/lib/fuentes.ts`): propuestas o
    programas de vivienda publicados en el periodo. Prefiere siempre el documento parlamentario (BOCG)
    si la propuesta está registrada en el Congreso o el Senado.
+
+**Parada temprana:** si tras revisar las fuentes del día no hay ningún candidato nuevo ni cambio de
+estado, termina ya con el resumen (sin instalar, validar ni construir).
 
 ## 2. Deduplicar
 
@@ -93,6 +106,7 @@ Criterios de redacción:
 ## 4. Validar, commit y deploy
 
 ```bash
+bun install --frozen-lockfile
 bun run validate   # esquema + nombres + duplicados
 bun test
 bun run build      # falla si una novedad no cumple el esquema zod
@@ -107,7 +121,9 @@ git push origin main
 ```
 
 El push a `main` dispara `.github/workflows/deploy.yml`, que vuelve a validar, construye y publica en
-Cloudflare Pages. Comprueba que el workflow termina en verde.
+Cloudflare Pages. Comprueba **una vez** que el workflow termina en verde. Si falla por algo ajeno a tu
+contenido (p. ej. faltan los secretos `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID`), no intentes
+arreglarlo: indícalo en el resumen.
 
 Si no hay novedades, no hagas commit. Termina con un resumen breve: ventana revisada, fuentes
 consultadas, novedades añadidas (título + enlace oficial) y descartes dudosos con el motivo.
