@@ -47,4 +47,6 @@ fuente_nombre: "BOE núm. BOE-A-2026-20822"
 
 `bun run validate` rechaza dos novedades con la misma `fuente_url` (normalizada: sin `www`, `utm_*`
 ni `#`) **y** el mismo `tipo`, o con el mismo título y fecha. Una misma fuente puede respaldar novedades
-de distinto tipo (p. ej. la ley y su votación).
+de distinto tipo (p. ej. la ley y su votación). Si una fuente recoge varias votaciones, se crea una
+novedad por votación, cada una con su `resultado`; para `votacion` con `resultado`, el resultado forma
+parte de la clave de duplicado.
