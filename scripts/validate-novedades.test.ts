@@ -72,6 +72,15 @@ describe("validarNovedades", () => {
     expect(validarNovedades(ficheros("{ si: 172, no: 178, abstencion: 0 }")).join()).toContain("duplicada");
   });
 
+  test("el resultado no distingue duplicados que no son votaciones", () => {
+    const ley = (titulo: string, resultado: string) => ({ ...base, titulo, resultado });
+    const errores = validarNovedades([
+      { nombre: "2026-10-07-a.md", contenido: md(ley('"Ley A"', "{ si: 172, no: 178 }")) },
+      { nombre: "2026-10-07-b.md", contenido: md(ley('"Ley B"', "{ si: 166, no: 184 }")) },
+    ]);
+    expect(errores.join()).toContain("duplicada");
+  });
+
   test("detecta duplicados por título y fecha", () => {
     const otra = { ...base, fuente_url: "https://www.congreso.es/es/notas-de-prensa" };
     const errores = validarNovedades([
