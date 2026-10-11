@@ -28,14 +28,15 @@ Usa un User-Agent de navegador: congreso.es y mivau.gob.es devuelven 403 sin él
 devolviendo 403 con el User-Agent, **no reintentes ni busques rodeos**: anótalo en el resumen y sigue.
 
 Las fuentes 1, 2 y 4 se consultan **cada día**. Senado (3) y partidos (5) solo los **lunes** (hora de
-Madrid), con la ventana de la semana anterior.
+Madrid), con una ventana de los últimos 14 días: así, si falla un lunes, el siguiente cubre las
+dos semanas (la deduplicación del paso 3 evita repetir).
 
 1. **BOE** — https://www.boe.es
    - Ayudante: `bun run scripts/fetch-boe.ts <desde AAAA-MM-DD> <hasta AAAA-MM-DD>` lista los
      ítems del sumario (API `https://www.boe.es/datosabiertos/api/boe/sumario/AAAAMMDD`) cuyo título
      o departamento menciona vivienda, alquiler, arrendamiento, desahucios, suelo, urbanismo, etc.
-     Por defecto ya descarta las secciones II (nombramientos, oposiciones) y V (anuncios,
-     contratación) y los recursos de la DGSJFP contra calificaciones registrales; añade `--todo` solo
+     Por defecto ya descarta la sección II (nombramientos, oposiciones), la V (anuncios,
+     contratación) salvo extractos de convocatorias de ayudas, y los recursos de la DGSJFP contra calificaciones registrales; añade `--todo` solo
      si sospechas que falta algo.
    - El filtro es amplio a propósito: **revisa cada ítem** y quédate solo con lo relevante para la
      política de vivienda (leyes, reales decretos-leyes, reales decretos, leyes autonómicas, ayudas,

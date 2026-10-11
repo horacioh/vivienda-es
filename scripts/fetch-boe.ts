@@ -18,8 +18,10 @@ export type BoeItem = {
 // Secciones II (nombramientos, oposiciones) y V (anuncios, contratación) y los recursos
 // de la DGSJFP contra calificaciones registrales casan con las palabras clave
 // ("hipoteca", "arrendamiento", "rehabilitación") pero nunca son política de vivienda.
+// Excepción: los extractos de convocatorias de ayudas, que el BOE publica en la sección V.
 export function esRuido(item: Pick<BoeItem, "seccion" | "titulo">): boolean {
-  if (/^(II|V)\./.test(item.seccion)) return true;
+  if (/^II\./.test(item.seccion)) return true;
+  if (/^V\./.test(item.seccion)) return !/^Extracto|ayudas|subvenci/i.test(item.titulo);
   return /Dirección General de Seguridad Jurídica y Fe Pública, en el recurso/i.test(item.titulo);
 }
 

@@ -20,6 +20,15 @@ describe("esRuido", () => {
     }
   });
 
+  test("conserva convocatorias de ayudas publicadas en la sección V", () => {
+    expect(
+      esRuido({
+        seccion: "V. Anuncios. - B. Otros anuncios oficiales",
+        titulo: "Extracto de la Orden por la que se convocan ayudas del Programa de vivienda asequible",
+      }),
+    ).toBe(false);
+  });
+
   test("descarta recursos de la DGSJFP contra calificaciones registrales", () => {
     expect(
       esRuido({
