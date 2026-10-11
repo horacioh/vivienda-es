@@ -15,9 +15,10 @@ git checkout main && git pull --ff-only
 bun install --frozen-lockfile
 ```
 
-Calcula la ventana: desde el día siguiente a la `fecha` más reciente en `src/content/novedades/`
-(o los últimos 3 días si es mayor) hasta hoy (hora de Madrid). Así recuperas días que una ejecución
-anterior se haya saltado.
+Calcula la ventana (hora de Madrid): empieza en la **más antigua** de estas dos fechas —la `fecha`
+más reciente en `src/content/novedades/` (incluida, para recoger lo publicado más tarde ese mismo
+día) u hoy menos 3 días— y termina hoy. Nunca la recortes: si hubo un hueco largo, revisa todos los
+días intermedios. La deduplicación del paso 3 evita repetir lo que ya existe.
 
 ## 1. Fuentes a consultar (en este orden)
 
