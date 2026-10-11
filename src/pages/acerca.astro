@@ -1,0 +1,37 @@
+---
+import Base from "../layouts/Base.astro";
+
+const fuentes = [
+  ["Boletín Oficial del Estado", "BOE", "https://www.boe.es", "Leyes, reales decretos-leyes, reales decretos y normas autonómicas publicadas en el BOE."],
+  ["Congreso de los Diputados", "Congreso", "https://www.congreso.es", "Iniciativas (proposiciones de ley por grupo), votaciones del Pleno y notas de prensa."],
+  ["Senado", "Senado", "https://www.senado.es", "Tramitación y votaciones en el Senado."],
+  ["Ministerio de Vivienda y Agenda Urbana", "MIVAU", "https://www.mivau.gob.es", "Sala de prensa, planes y ayudas."],
+  ["La Moncloa", "Moncloa", "https://www.lamoncloa.gob.es", "Referencias del Consejo de Ministros."],
+  ["Webs oficiales de los partidos", "Partidos", "https://github.com/horacioh/vivienda-es/blob/main/src/lib/fuentes.ts", "Programas y propuestas publicadas por los propios partidos."],
+] as const;
+---
+<Base title="Fuentes y método" description="Qué fuentes oficiales usa Vivienda ES y cómo se actualiza cada día.">
+  <div class="mx-auto max-w-2xl pt-8 sm:pt-14">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-accent">Método</p>
+    <h1 class="mt-3 font-display text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl">Fuentes y método</h1>
+    <p class="mt-4 text-lg leading-relaxed text-ink-2 text-pretty">
+      Cada novedad procede de una fuente oficial y enlaza al documento original. Si un dato no tiene enlace oficial verificable, no se publica: el build del sitio falla si a una novedad le falta <code class="rounded bg-ink/5 px-1 py-0.5 text-[0.9em]">fuente_url</code> o si su dominio no está en la lista de fuentes oficiales.
+    </p>
+    <h2 class="mt-12 font-display text-2xl font-semibold tracking-tight">Fuentes</h2>
+    <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+      {fuentes.map(([nombre, corto, url, desc]) => (
+        <li>
+          <a href={url} target="_blank" rel="noopener" class="group flex h-full flex-col rounded-2xl bg-card p-4 shadow-card transition-[box-shadow,translate] hover:-translate-y-0.5">
+            <span class="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-accent">{corto}</span>
+            <span class="mt-1 font-semibold leading-snug">{nombre} <span aria-hidden="true" class="text-muted transition-colors group-hover:text-accent">→</span></span>
+            <span class="mt-1 text-sm leading-relaxed text-muted text-pretty">{desc}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <h2 class="mt-12 font-display text-2xl font-semibold tracking-tight">Actualización diaria</h2>
+    <p class="mt-3 text-[1.05rem] leading-relaxed text-ink-2 text-pretty">
+      Una tarea programada revisa cada día el BOE, el Congreso, el Senado y el Ministerio de Vivienda, añade las novedades nuevas como ficheros versionados en git y publica el sitio. El resumen de cada novedad es una síntesis; el texto que vale es siempre el de la fuente oficial.
+    </p>
+  </div>
+</Base>

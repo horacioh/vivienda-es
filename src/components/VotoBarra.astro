@@ -1,0 +1,29 @@
+---
+interface Props {
+  si: number;
+  no: number;
+  abstencion: number;
+  class?: string;
+}
+
+const { si, no, abstencion, class: className } = Astro.props;
+const total = si + no + abstencion || 1;
+const pct = (n: number) => `${((n / total) * 100).toFixed(2)}%`;
+---
+<div class:list={["rounded-xl bg-paper px-3.5 py-3", className]}>
+  <div class="flex items-baseline justify-between gap-3 text-sm tabular-nums">
+    <span><span class="font-semibold text-si">{si}</span> <span class="text-muted">a favor</span></span>
+    {abstencion > 0 && <span class="text-muted"><span class="font-semibold text-ink-2">{abstencion}</span> abst.</span>}
+    <span><span class="text-muted">en contra</span> <span class="font-semibold text-no">{no}</span></span>
+  </div>
+  <div
+    class="relative mt-2 flex h-2 overflow-hidden rounded-full bg-line"
+    role="img"
+    aria-label={`${si} votos a favor, ${no} en contra y ${abstencion} abstenciones`}
+  >
+    <span class="bg-si" style={`width:${pct(si)}`}></span>
+    <span class="bg-abst" style={`width:${pct(abstencion)}`}></span>
+    <span class="bg-no" style={`width:${pct(no)}`}></span>
+    <span class="absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-card" aria-hidden="true"></span>
+  </div>
+</div>

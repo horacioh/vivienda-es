@@ -1,0 +1,70 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const documentTitle = title === "Vivienda ES" ? title : `${title} · Vivienda ES`;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f4ee" />
+    <title>{documentTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="alternate" type="application/rss+xml" title="Vivienda ES" href={`${base}/rss.xml`} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={documentTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Vivienda ES" />
+  </head>
+  <body class="flex min-h-dvh flex-col border-t-[3px] border-accent">
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-card focus:px-3 focus:py-2 focus:shadow-card">Saltar al contenido</a>
+    <header>
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <a href={`${base}/`} class="flex min-h-11 items-center gap-2.5 text-ink">
+          <span aria-hidden="true" class="grid size-8 place-items-center rounded-[9px] bg-accent text-white shadow-[inset_0_-1px_0_rgb(0_0_0/0.18)]">
+            <svg viewBox="0 0 24 24" class="size-[1.15rem]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+          </span>
+          <span class="font-display text-[1.4rem] font-semibold leading-none tracking-[-0.02em]">Vivienda</span>
+          <span class="-ml-1 rounded-[5px] bg-ink px-1.5 py-[3px] text-[0.62rem] font-bold leading-none tracking-[0.12em] text-paper">ES</span>
+        </a>
+        <nav class="flex items-center gap-1 text-sm" aria-label="Principal">
+          <a href={`${base}/acerca`} class="inline-flex min-h-11 items-center rounded-full px-3 font-medium text-ink-2 transition-colors hover:bg-ink/5 hover:text-ink"><span class="sm:hidden">Fuentes</span><span class="hidden sm:inline">Fuentes y método</span></a>
+          <a href={`${base}/rss.xml`} aria-label="RSS" class="grid size-11 place-items-center rounded-full text-muted transition-colors hover:bg-ink/5 hover:text-ink">
+            <svg viewBox="0 0 24 24" class="size-[1.05rem]" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 11a8 8 0 0 1 8 8"/><path d="M5 5a14 14 0 0 1 14 14"/><circle cx="6" cy="18" r="1.2" fill="currentColor"/></svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+    <main id="contenido" class="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 sm:px-6">
+      <slot />
+    </main>
+    <footer class="border-t border-line bg-card/60">
+      <div class="mx-auto grid max-w-5xl gap-6 px-4 py-10 text-sm sm:grid-cols-[1fr_auto] sm:px-6">
+        <div>
+          <p class="font-display text-lg font-semibold tracking-tight">Vivienda ES</p>
+          <p class="mt-2 max-w-md leading-relaxed text-muted text-pretty">
+            Novedades sobre vivienda en España, actualizadas a diario. Cada dato enlaza a su fuente oficial: BOE, Congreso, Senado, Ministerio de Vivienda y webs oficiales de los partidos.
+          </p>
+        </div>
+        <ul class="flex gap-5 text-muted sm:flex-col sm:gap-2">
+          <li><a class="transition-colors hover:text-ink" href={`${base}/acerca`}>Fuentes y método</a></li>
+          <li><a class="transition-colors hover:text-ink" href={`${base}/rss.xml`}>RSS</a></li>
+          <li><a class="transition-colors hover:text-ink" href="https://github.com/horacioh/vivienda-es">GitHub</a></li>
+        </ul>
+      </div>
+    </footer>
+  </body>
+</html>

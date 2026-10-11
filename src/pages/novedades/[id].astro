@@ -1,0 +1,85 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import VotoBarra from "../../components/VotoBarra.astro";
+import Base from "../../layouts/Base.astro";
+import { ESTADO_LABEL, TIPO_LABEL, dominio, fechaLarga, isoDia } from "../../lib/novedades";
+
+export async function getStaticPaths() {
+  const novedades = await getCollection("novedades");
+  return novedades.map((novedad) => ({ params: { id: novedad.id }, props: { novedad } }));
+}
+
+interface Props {
+  novedad: CollectionEntry<"novedades">;
+}
+
+const { novedad } = Astro.props;
+const d = novedad.data;
+const { Content } = await render(novedad);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const filas = [
+  ["Fecha", fechaLarga(d.fecha)],
+  ["Tipo", TIPO_LABEL[d.tipo]],
+  ["Partido", d.partido],
+  ["Institución", d.institucion],
+  ["Estado", d.estado && ESTADO_LABEL[d.estado]],
+  ["Fuente", d.fuente_nombre],
+].filter((f): f is [string, string] => !!f[1]);
+---
+<Base title={d.titulo} description={d.resumen}>
+  <nav class="pt-4 text-sm" aria-label="Migas">
+    <a href={`${base}/`} class="-ml-3 inline-flex min-h-11 items-center gap-1 rounded-full px-3 font-medium text-muted transition-colors hover:bg-ink/5 hover:text-ink">← Todas las novedades</a>
+  </nav>
+  <article class="mx-auto max-w-2xl pt-4 sm:pt-8" style={`--tipo: var(--color-${d.tipo})`}>
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span class="inline-flex items-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.1em] text-(--tipo)">
+        <span class="size-2 rounded-full bg-(--tipo)" aria-hidden="true"></span>{TIPO_LABEL[d.tipo]}
+      </span>
+      <time datetime={isoDia(d.fecha)} class="text-sm text-muted">{fechaLarga(d.fecha)}</time>
+      {d.estado && <span class={`estado estado-${d.estado}`}>{ESTADO_LABEL[d.estado]}</span>}
+    </div>
+    <h1 class="mt-3 font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.02em] text-balance sm:text-[2.75rem]">
+      <a href={d.fuente_url} target="_blank" rel="noopener" class="underline decoration-transparent decoration-2 underline-offset-[6px] transition-[text-decoration-color] hover:decoration-(--tipo)">{d.titulo}</a>
+    </h1>
+    <p class="mt-4 text-lg leading-relaxed text-ink-2 text-pretty">{d.resumen}</p>
+
+    <a
+      href={d.fuente_url}
+      target="_blank"
+      rel="noopener"
+      class="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-accent px-6 font-semibold text-white shadow-[inset_0_-1px_0_rgb(0_0_0/0.18),0_6px_16px_-8px_rgb(192_57_43/0.6)] transition-[background-color,scale] hover:bg-accent-dark active:scale-[0.96] sm:w-auto"
+    >Ver fuente oficial →</a>
+    <p class="mt-2 text-center text-xs text-muted sm:text-left">{dominio(d.fuente_url)}</p>
+
+    {d.resultado && (
+      <section class="mt-8">
+        <h2 class="text-[0.72rem] font-bold uppercase tracking-[0.1em] text-muted">Resultado de la votación</h2>
+        <VotoBarra class="mt-2 !bg-card shadow-card" si={d.resultado.si} no={d.resultado.no} abstencion={d.resultado.abstencion} />
+      </section>
+    )}
+
+    {d.votos_por_grupo && (
+      <section class="mt-8">
+        <h2 class="text-[0.72rem] font-bold uppercase tracking-[0.1em] text-muted">Votos por grupo</h2>
+        <div class="mt-2 overflow-x-auto rounded-2xl bg-card shadow-card">
+          <table class="w-full text-sm tabular-nums">
+            <thead class="text-left text-muted"><tr><th class="p-3 pl-4 font-medium">Grupo</th><th class="p-3 font-medium">Sí</th><th class="p-3 font-medium">No</th><th class="p-3 pr-4 font-medium">Abst.</th></tr></thead>
+            <tbody>
+              {d.votos_por_grupo.map((v) => (
+                <tr class="border-t border-line"><td class="p-3 pl-4 font-medium">{v.grupo}</td><td class="p-3 text-si">{v.si}</td><td class="p-3 text-no">{v.no}</td><td class="p-3 pr-4">{v.abstencion}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )}
+
+    <div class="prose-novedad mt-8"><Content /></div>
+
+    <dl class="mt-8 grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 rounded-2xl bg-card p-5 text-sm shadow-card">
+      {filas.map(([k, v]) => (<><dt class="text-muted">{k}</dt><dd class="font-medium">{v}</dd></>))}
+      <dt class="text-muted">Enlace</dt>
+      <dd class="min-w-0 break-all"><a href={d.fuente_url} target="_blank" rel="noopener" class="text-accent-dark underline underline-offset-4">{d.fuente_url}</a></dd>
+    </dl>
+  </article>
+</Base>
