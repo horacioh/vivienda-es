@@ -2,6 +2,7 @@
 const form = document.querySelector<HTMLFormElement>("#filtros");
 const contador = document.querySelector<HTMLElement>("#contador");
 const vacio = document.querySelector<HTMLElement>("#vacio");
+const limpiar = document.querySelector<HTMLButtonElement>("#limpiar");
 
 function aplicar(tipo: string, partido: string) {
   let visibles = 0;
@@ -15,8 +16,9 @@ function aplicar(tipo: string, partido: string) {
     dia.hidden = enDia === 0;
     visibles += enDia;
   }
-  if (contador) contador.textContent = `${visibles} ${visibles === 1 ? "resultado" : "resultados"}`;
+  if (contador) contador.textContent = `${visibles} ${visibles === 1 ? "novedad" : "novedades"}`;
   if (vacio) vacio.hidden = visibles > 0;
+  if (limpiar) limpiar.hidden = !tipo && !partido;
 }
 
 function leerForm() {
@@ -44,5 +46,9 @@ if (form) {
   };
   form.addEventListener("change", sync);
   form.addEventListener("submit", (e) => e.preventDefault());
+  limpiar?.addEventListener("click", () => {
+    form.reset();
+    sync();
+  });
   sync();
 }

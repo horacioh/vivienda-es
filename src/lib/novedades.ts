@@ -51,3 +51,18 @@ export const fechaLarga = (d: Date) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 export const fechaCorta = (d: Date) => corta.format(d);
+
+const partes = new Intl.DateTimeFormat("es-ES", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+export function partesDia(d: Date) {
+  const p = Object.fromEntries(partes.formatToParts(d).map((x) => [x.type, x.value]));
+  return { dia: p.day, mes: p.month, anio: p.year, semana: p.weekday };
+}
+const diaMes = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
+export const fechaDiaMes = (d: Date) => diaMes.format(d).replace(".", "");
+export const dominio = (url: string) => new URL(url).hostname.replace(/^www\./, "");
