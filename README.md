@@ -1,0 +1,124 @@
+# Vivienda ES
+
+Novedades diarias sobre **vivienda en España** — leyes, aprobaciones, propuestas de los partidos y
+votaciones en el Parlamento — **siempre con enlace a la fuente oficial**.
+
+- Web: https://vivienda-es.pages.dev (Cloudflare Pages)
+- Filtros por URL: [`/?tipo=votacion`](https://vivienda-es.pages.dev/?tipo=votacion),
+  [`/?partido=Sumar`](https://vivienda-es.pages.dev/?partido=Sumar),
+  [`/?tipo=propuesta&partido=PP`](https://vivienda-es.pages.dev/?tipo=propuesta&partido=PP)
+
+## Arquitectura
+
+```
+src/content/novedades/*.md   ← una novedad por fichero (fuente de la verdad, versionada en git)
+src/content.config.ts        ← collection `novedades` (glob loader + esquema zod)
+src/lib/fuentes.ts           ← lista de dominios oficiales admitidos en `fuente_url`
+src/pages/index.astro        ← feed cronológico inverso agrupado por día + filtros
+src/pages/novedades/[id].astro ← página de detalle por novedad
+src/pages/rss.xml.ts         ← RSS con las 50 últimas
+src/scripts/filtros.ts       ← filtrado en cliente (tipo/partido) sincronizado con ?tipo=&partido=
+scripts/validate-novedades.ts← validación + deduplicación (Bun) antes del build/commit
+scripts/fetch-boe.ts         ← ayudante: ítems de vivienda del sumario del BOE (API de datos abiertos)
+.agents/daily-update.md      ← prompt de la actualización diaria (lo ejecuta una automation de Devin)
+.github/workflows/deploy.yml ← test + build + `wrangler pages deploy` en cada push a main
+```
+
+- **Astro estático** (`output: "static"`), Tailwind CSS v4 vía `@tailwindcss/vite`, mismo patrón que
+  `apps/blog` de `horacioh/bjj-scheduler`.
+- **Content collections**: cada `.md` se valida con zod en el build. `fuente_url` es obligatorio
+  (`z.string().url()`) y además debe ser `https` y de un dominio oficial; si no, **el build falla**.
+- Mobile-first: una columna en móvil, filtros fijos arriba, objetivos táctiles ≥ 44 px; escala a
+  escritorio con ancho de lectura limitado.
+- Cada tarjeta muestra fecha, tipo, partido/institución, título (enlazado a la fuente), resumen,
+  estado y **“Ver fuente oficial →”** (`target="_blank" rel="noopener"`).
+
+## Desarrollo local
+
+Requiere [Bun](https://bun.sh) (los scripts de validación usan Bun; Astro funciona también con Node 22+).
+
+```bash
+bun install
+bun run dev        # http://localhost:4321
+bun run validate   # esquema + nombres de fichero + duplicados
+bun test           # tests del validador y de las novedades del repo
+bun run typecheck  # astro check
+bun run build      # validate + astro build → dist/
+bun run preview
+```
+
+Con npm: `npm install && npm run dev` (para `build`/`validate`/`test` hace falta Bun instalado).
+
+## Esquema de datos
+
+Documentado en [`src/content/novedades/README.md`](src/content/novedades/README.md). Resumen:
+
+| Campo | Obligatorio | Valores |
+| --- | --- | --- |
+| `fecha` | sí | `AAAA-MM-DD` (coincide con el nombre del fichero) |
+| `titulo`, `resumen` | sí | texto |
+| `tipo` | sí | `ley` · `propuesta` · `votacion` · `aprobacion` · `otro` |
+| `partido` | no | nombre corto: `PSOE`, `PP`, `VOX`, `Sumar`, `Grupo Mixto`… |
+| `institucion` | no | texto |
+| `estado` | no | `propuesta` · `en-tramite` · `aprobada` · `rechazada` · `caducada` |
+| `fuente_url` | **sí** | URL https de un dominio oficial |
+| `fuente_nombre` | sí | texto |
+| `resultado`, `votos_por_grupo` | no | votaciones |
+
+## Fuentes oficiales
+
+| Fuente | Qué se extrae |
+| --- | --- |
+| [BOE](https://www.boe.es) — API de datos abiertos | Leyes, reales decretos-leyes, reales decretos, leyes autonómicas, resoluciones |
+| [Congreso de los Diputados](https://www.congreso.es) — notas de prensa y datos abiertos | Votaciones del Pleno, convalidaciones/derogaciones, proposiciones de ley por grupo (BOCG) |
+| [Senado](https://www.senado.es) | Tramitación y votaciones |
+| [Ministerio de Vivienda y Agenda Urbana](https://www.mivau.gob.es) | Planes, ayudas, anuncios |
+| [La Moncloa](https://www.lamoncloa.gob.es) | Referencias del Consejo de Ministros |
+| Webs oficiales de los partidos | Propuestas y programas de vivienda |
+
+La lista exacta de dominios admitidos está en [`src/lib/fuentes.ts`](src/lib/fuentes.ts).
+
+## Actualización diaria
+
+1. Una **automation programada de Devin** se ejecuta cada mañana y sigue
+   [`.agents/daily-update.md`](.agents/daily-update.md): consulta BOE, Congreso, Senado, Ministerio y
+   webs de partidos; extrae las novedades de vivienda desde la última fecha publicada; deduplica contra
+   `src/content/novedades/`; y crea los nuevos `.md` respetando el esquema.
+2. Ejecuta `bun run validate`, `bun test` y `bun run build`.
+3. Hace commit (`novedades: AAAA-MM-DD (N nuevas)`) y push a `main`.
+4. El push dispara `.github/workflows/deploy.yml`, que valida, construye y publica en Cloudflare Pages.
+
+Para lanzarla a mano: abre una sesión de Devin en este repo con el prompt
+“Sigue `.agents/daily-update.md`”.
+
+## Despliegue
+
+### Cloudflare Pages (por defecto)
+
+`.github/workflows/deploy.yml` ejecuta en cada push a `main`:
+
+```bash
+bun install --frozen-lockfile && bun test && bun run typecheck && bun run build
+bunx wrangler pages deploy dist --project-name=vivienda-es --branch=main
+```
+
+Configuración una sola vez:
+
+1. Crea el proyecto: `bunx wrangler pages project create vivienda-es --production-branch=main`
+   (o en el dashboard: Workers & Pages → Create → Pages → Direct Upload, nombre `vivienda-es`).
+2. En GitHub → Settings → Secrets and variables → Actions:
+   - Secret `CLOUDFLARE_API_TOKEN` (token con permiso *Cloudflare Pages: Edit*).
+   - Secret `CLOUDFLARE_ACCOUNT_ID`.
+   - Variable opcional `SITE_URL` si usas un dominio propio (por defecto `https://vivienda-es.pages.dev`).
+
+### GitHub Pages (alternativa)
+
+`.github/workflows/github-pages.yml` (manual, `workflow_dispatch`) construye con
+`SITE_URL=https://<usuario>.github.io` y `BASE_PATH=/vivienda-es` y publica con `actions/deploy-pages`.
+Activa *Settings → Pages → Source: GitHub Actions* y, si quieres que sea el despliegue principal,
+cambia su trigger a `push` a `main`.
+
+## Aviso
+
+Los resúmenes son una síntesis informativa; el texto con validez es siempre el de la fuente oficial
+enlazada.

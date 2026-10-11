@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+
+const fuentes = [
+  ["Boletín Oficial del Estado (BOE)", "https://www.boe.es", "Leyes, reales decretos-leyes, reales decretos y normas autonómicas publicadas en el BOE."],
+  ["Congreso de los Diputados", "https://www.congreso.es", "Iniciativas (proposiciones de ley por grupo), votaciones del Pleno y notas de prensa."],
+  ["Senado", "https://www.senado.es", "Tramitación y votaciones en el Senado."],
+  ["Ministerio de Vivienda y Agenda Urbana", "https://www.mivau.gob.es", "Sala de prensa, planes y ayudas."],
+  ["La Moncloa", "https://www.lamoncloa.gob.es", "Referencias del Consejo de Ministros."],
+  ["Webs oficiales de los partidos", "https://github.com/horacioh/vivienda-es/blob/main/src/lib/fuentes.ts", "Programas y propuestas publicadas por los propios partidos."],
+] as const;
+---
+<Base title="Fuentes y método" description="Qué fuentes oficiales usa Vivienda ES y cómo se actualiza cada día.">
+  <div class="pt-8">
+    <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Fuentes y método</h1>
+    <p class="mt-3 max-w-prose leading-relaxed text-ink/85">
+      Cada novedad procede de una fuente oficial y enlaza al documento original. Si un dato no tiene enlace oficial verificable, no se publica: el build del sitio falla si a una novedad le falta <code>fuente_url</code> o si su dominio no está en la lista de fuentes oficiales.
+    </p>
+    <h2 class="mt-8 text-lg font-semibold">Fuentes</h2>
+    <ul class="mt-3 space-y-3">
+      {fuentes.map(([nombre, url, desc]) => (
+        <li class="rounded-xl border border-line bg-white p-4">
+          <a href={url} target="_blank" rel="noopener" class="font-semibold text-accent-dark underline-offset-4 hover:underline">{nombre} →</a>
+          <p class="mt-1 text-sm text-muted">{desc}</p>
+        </li>
+      ))}
+    </ul>
+    <h2 class="mt-8 text-lg font-semibold">Actualización diaria</h2>
+    <p class="mt-2 max-w-prose leading-relaxed text-ink/85">
+      Una tarea programada revisa cada día el BOE, el Congreso, el Senado y el Ministerio de Vivienda, añade las novedades nuevas como ficheros versionados en git y publica el sitio. El resumen de cada novedad es una síntesis; el texto que vale es siempre el de la fuente oficial.
+    </p>
+  </div>
+</Base>

@@ -1,0 +1,25 @@
+{
+  "name": "vivienda-es",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "bun run scripts/validate-novedades.ts && astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "validate": "bun run scripts/validate-novedades.ts",
+    "test": "bun test scripts",
+    "deploy": "wrangler pages deploy dist --project-name=vivienda-es"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^7.3.5",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/bun": "latest",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.65.0"
+  }
+}

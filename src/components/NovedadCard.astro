@@ -1,0 +1,64 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { ESTADO_LABEL, TIPO_LABEL, fechaCorta, isoDia } from "../lib/novedades";
+
+interface Props {
+  novedad: CollectionEntry<"novedades">;
+}
+
+const { novedad } = Astro.props;
+const d = novedad.data;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const detalle = `${base}/novedades/${novedad.id}`;
+const quien = [d.partido, d.institucion].filter(Boolean).join(" · ");
+
+const tipoColor: Record<string, string> = {
+  ley: "bg-indigo-50 text-indigo-800 ring-indigo-200",
+  propuesta: "bg-amber-50 text-amber-900 ring-amber-200",
+  votacion: "bg-sky-50 text-sky-900 ring-sky-200",
+  aprobacion: "bg-emerald-50 text-emerald-900 ring-emerald-200",
+  otro: "bg-stone-100 text-stone-700 ring-stone-200",
+};
+const estadoColor: Record<string, string> = {
+  propuesta: "text-amber-800",
+  "en-tramite": "text-sky-800",
+  aprobada: "text-emerald-800",
+  rechazada: "text-red-800",
+  caducada: "text-stone-600",
+};
+---
+<article
+  class="novedad rounded-xl border border-line bg-white p-4 shadow-[0_1px_2px_rgba(19,32,47,0.05)] sm:p-5"
+  data-tipo={d.tipo}
+  data-partido={d.partido ?? ""}
+>
+  <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs">
+    <span class={`rounded-full px-2 py-0.5 font-medium ring-1 ring-inset ${tipoColor[d.tipo]}`}>{TIPO_LABEL[d.tipo]}</span>
+    {d.estado && (
+      <span class={`inline-flex items-center gap-1 font-medium ${estadoColor[d.estado]}`}>
+        <span aria-hidden="true" class="size-1.5 rounded-full bg-current"></span>
+        {ESTADO_LABEL[d.estado]}
+      </span>
+    )}
+    <time datetime={isoDia(d.fecha)} class="ml-auto tabular-nums text-muted">{fechaCorta(d.fecha)}</time>
+  </div>
+  {quien && <p class="mt-2.5 text-sm font-medium text-muted">{quien}</p>}
+  <h3 class="mt-1 text-[1.05rem] font-semibold leading-snug text-pretty sm:text-lg">
+    <a href={d.fuente_url} target="_blank" rel="noopener" class="decoration-accent/40 underline-offset-4 hover:underline">{d.titulo}</a>
+  </h3>
+  <p class="mt-2 text-[0.95rem] leading-relaxed text-ink/85">{d.resumen}</p>
+  {d.resultado && (
+    <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm tabular-nums">
+      <span><span class="font-semibold text-emerald-800">{d.resultado.si}</span> sí</span>
+      <span><span class="font-semibold text-red-800">{d.resultado.no}</span> no</span>
+      <span><span class="font-semibold text-stone-700">{d.resultado.abstencion}</span> abst.</span>
+    </p>
+  )}
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-3 text-sm">
+    <a href={d.fuente_url} target="_blank" rel="noopener" class="inline-flex min-h-11 items-center font-semibold text-accent-dark hover:underline underline-offset-4">
+      Ver fuente oficial →
+    </a>
+    <span class="text-xs text-muted">{d.fuente_nombre}</span>
+    <a href={detalle} class="inline-flex min-h-11 items-center text-muted hover:text-ink hover:underline underline-offset-4">Detalle</a>
+  </div>
+</article>
