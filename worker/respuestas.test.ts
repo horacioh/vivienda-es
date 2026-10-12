@@ -48,7 +48,10 @@ describe("borrado", () => {
   test("después del borrado no hay cifras", () => {
     expect(resultados(500, [], BORRADO)).toEqual({ veda: false, cerrado: true, minimo: MINIMO });
   });
-  test("no se cachea más allá del borrado", () => expect(maxAge(BORRADO - 30_000)).toBe(30));
+  test("no se cachea más allá del borrado", () => {
+    expect(maxAge(BORRADO - 30_000)).toBe(30);
+    expect(maxAge(BORRADO - 500)).toBe(0);
+  });
 });
 
 describe("maxAge", () => {

@@ -42,6 +42,7 @@ export default {
       });
       if (!humano)
         return json({ error: "No se ha podido comprobar que no eres un robot" }, 403);
+      if (cerrado(Date.now())) return json({ error: "Ya no se aceptan respuestas" }, 410);
       const fecha = new Date().toISOString().slice(0, 10);
       await (await db(env)).prepare("INSERT INTO envios (fecha, respuestas) VALUES (?, ?)").bind(fecha, JSON.stringify(envio)).run();
       return json({ ok: true }, 201);

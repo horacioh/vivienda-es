@@ -315,7 +315,7 @@ async function cargarOpiniones(recargar = false) {
   }
   if (!d.turnstile) return;
   sitekey = d.turnstile;
-  if (!hayApi && !d.cerrado) (hayApi = true), prepararCompartir();
+  if (hayApi === !!d.cerrado) (hayApi = !d.cerrado), prepararCompartir();
   $("opiniones").hidden = false;
   const estado = $("op-estado"), lista = $("op-lista");
   lista.replaceChildren();

@@ -64,7 +64,7 @@ export async function verificarTurnstile(
 
 /** Seconds a /api/resultados response may be cached: never past the start of the blackout or the deletion date. */
 export function maxAge(ahora: number, normal = 300) {
-  const limites = [VEDA.desde, BORRADO].map((t) => Math.floor((t - ahora) / 1000)).filter((s) => s > 0);
+  const limites = [VEDA.desde, BORRADO].filter((t) => t > ahora).map((t) => Math.floor((t - ahora) / 1000));
   return Math.min(normal, ...limites);
 }
 
