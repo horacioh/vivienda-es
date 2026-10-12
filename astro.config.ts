@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 
 // SITE_URL/BASE_PATH permiten publicar el mismo build en GitHub Pages
 // (https://horacioh.github.io/vivienda-es) sin tocar el código.
-const site = process.env.SITE_URL || "https://vivienda-es.horacioh.workers.dev";
+const site = process.env.SITE_URL || "https://vivienda-es.hhg.app";
 const base = process.env.BASE_PATH || "/";
 
 export default defineConfig({
