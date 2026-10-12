@@ -103,9 +103,12 @@ código de Worker). Configuración en el dashboard (Worker → Settings → Buil
   commit que no pase los tests no se publica.
 - Deploy command: `npx wrangler deploy` (el valor por defecto; sin flags como `--assets`, que
   ignorarían `wrangler.jsonc`).
-- Variables de build: **`BUN_VERSION=1.4.3`** (obligatoria: la imagen de build trae Bun 1.2.15, que
-  no lee el formato actual de `bun.lock`, y Cloudflare solo acepta la versión de Bun por variable, no
-  por fichero). Opcional: `SITE_URL` si usas un dominio propio.
+- Variables de build: **`BUN_VERSION`** con la misma versión que `.bun-version` (obligatoria: la
+  imagen de build trae Bun 1.2.15, que no lee el formato actual de `bun.lock`, y Cloudflare solo acepta
+  la versión de Bun por variable, no por fichero). Opcional: `SITE_URL` si usas un dominio propio.
+
+**Actualizar Bun:** cambia `.bun-version` (lo lee el CI de GitHub), ejecuta `bun install` con esa
+versión para regenerar `bun.lock`, y pon el mismo valor en `BUN_VERSION` en Cloudflare.
 
 `.github/workflows/deploy.yml` solo hace de CI en GitHub. Para publicar a mano:
 `bun run build && bun run deploy`.
