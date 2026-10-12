@@ -8,6 +8,54 @@ votaciones en el Parlamento — **siempre con enlace a la fuente oficial**.
   [`/?partido=Sumar`](https://vivienda-es.hhg.app/?partido=Sumar),
   [`/?tipo=propuesta&partido=PP`](https://vivienda-es.hhg.app/?tipo=propuesta&partido=PP)
 
+## Revisar y auditar el proyecto
+
+Todo lo que publica la web sale de este repositorio: no hay CMS ni base de datos de contenido, y el
+historial de git muestra quién cambió qué y cuándo (las novedades diarias las añade una automation de
+Devin con commits `novedades: AAAA-MM-DD`). Para comprobarlo:
+
+- **Una novedad:** cada fichero de `src/content/novedades/` tiene `fuente_url`, el documento oficial.
+  El build falla si la URL no es `https` de un dominio de [`src/lib/fuentes.ts`](src/lib/fuentes.ts).
+- **La postura de un partido:** cada afirmación de [`src/data/cuestionario.ts`](src/data/cuestionario.ts)
+  lista sus votaciones (`votacion` es la ruta del JSON oficial en `https://www.congreso.es`) y qué voto
+  equivale a «de acuerdo» (`sentido`). Para reproducir los datos desde cero:
+  ```bash
+  bun install
+  bun run votos                         # vuelve a descargar los votos del Congreso
+  git diff src/data/votos-congreso.json # sin cambios = los datos publicados coinciden con los oficiales
+  ```
+- **El cálculo:** [`src/lib/cuestionario.ts`](src/lib/cuestionario.ts) (a favor +1, en contra −1,
+  abstención 0; media si hay varias votaciones; «me importa mucho» cuenta doble). El método y sus límites
+  están explicados en la propia página `/elecciones` (sección «Cómo se calcula»).
+- **Cómo se eligieron las afirmaciones:** de las votaciones del Pleno sobre vivienda de la XV legislatura
+  (2024–2026), solo las que tratan una propuesta concreta y reconocible; se descartan las que mezclan
+  medidas distintas en un mismo voto. Los partidos sin grupo propio (en el Grupo Mixto) se leen diputado
+  a diputado.
+- **Privacidad:** el navegador solo envía algo si el usuario pulsa «Compartir de forma anónima».
+  [`worker/index.ts`](worker/index.ts) guarda el día y las respuestas, nada más; la IP se usa en memoria
+  para el rate limit y la comprobación de Turnstile y no se guarda. Los tests están en
+  [`worker/respuestas.test.ts`](worker/respuestas.test.ts) (`bun test worker`).
+- **Tests:** `bun run build` ejecuta validación, tests, `astro check` y build, igual que el CI.
+
+### Qué no está en el repositorio
+
+| Qué | Dónde está | Por qué |
+| --- | --- | --- |
+| `TURNSTILE_SECRET` | Secret del Worker en Cloudflare | Es la clave privada de Turnstile. |
+| Respuestas anónimas compartidas | D1 `vivienda-es` en Cloudflare | Se publican solo agregadas en `/elecciones`. |
+| Configuración de build (`BUN_VERSION`) | Workers Builds en Cloudflare | Ver «Despliegue». |
+
+`wrangler.jsonc` sí incluye la clave pública de Turnstile (`TURNSTILE_SITEKEY`, visible en cualquier
+caso en la web) y el ID de la base de datos D1: son identificadores, no credenciales, y no dan acceso sin
+una cuenta de Cloudflare autorizada. El CI pasa [gitleaks](https://github.com/gitleaks/gitleaks) sobre
+todo el historial en cada push y PR; en local: `gitleaks git --log-opts=--all .`
+
+### Errores y sugerencias
+
+Si un dato es incorrecto, falta una votación o un resumen no es neutral, abre un
+[issue](https://github.com/horacioh/vivienda-es/issues) con el enlace a la fuente oficial. Para
+problemas de seguridad, ver [`SECURITY.md`](SECURITY.md).
+
 ## Arquitectura
 
 ```
@@ -17,16 +65,23 @@ src/lib/fuentes.ts           ← lista de dominios oficiales admitidos en `fuent
 src/pages/index.astro        ← feed cronológico inverso agrupado por día + filtros
 src/pages/novedades/[id].astro ← página de detalle por novedad
 src/pages/rss.xml.ts         ← RSS con las 50 últimas
+src/pages/elecciones.astro   ← cuestionario 29N, «Qué votó cada partido» y método
+src/pages/acerca.astro       ← método y fuentes del feed
+src/data/cuestionario.ts     ← afirmaciones, votaciones que las respaldan y partidos comparados
+src/data/votos-congreso.json ← votos por grupo descargados del Congreso (generado, no se edita a mano)
+src/lib/cuestionario.ts      ← postura de cada partido y puntuación de coincidencia
+src/scripts/cuestionario.ts  ← cuestionario en el navegador (respuestas, resultado, compartir)
 src/scripts/filtros.ts       ← filtrado en cliente (tipo/partido) sincronizado con ?tipo=&partido=
 worker/index.ts              ← Worker: solo /api/* (respuestas anónimas del cuestionario en D1)
+worker/respuestas.ts         ← validación de respuestas, Turnstile, veda electoral y agregados
+scripts/fetch-votos-congreso.ts ← `bun run votos`: regenera src/data/votos-congreso.json
 scripts/validate-novedades.ts← validación + deduplicación (Bun) antes del build/commit
 scripts/fetch-boe.ts         ← ayudante: ítems de vivienda del sumario del BOE (API de datos abiertos)
 .agents/daily-update.md      ← prompt de la actualización diaria (lo ejecuta una automation de Devin)
 .github/workflows/deploy.yml ← CI: test + typecheck + build en cada push y PR
 ```
 
-- **Astro estático** (`output: "static"`), Tailwind CSS v4 vía `@tailwindcss/vite`, mismo patrón que
-  `apps/blog` de `horacioh/bjj-scheduler`.
+- **Astro estático** (`output: "static"`), Tailwind CSS v4 vía `@tailwindcss/vite`.
 - **Content collections**: cada `.md` se valida con zod en el build. `fuente_url` es obligatorio
   (`z.string().url()`) y además debe ser `https` y de un dominio oficial; si no, **el build falla**.
 - Mobile-first: una columna en móvil, filtros fijos arriba, objetivos táctiles ≥ 44 px; escala a
