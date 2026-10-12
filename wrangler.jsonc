@@ -35,6 +35,9 @@
       "simple": { "limit": 5, "period": 60 }
     }
   ],
+  // Cada día a las 03:00 UTC: borra las respuestas guardadas a partir del 1 de enero de 2027
+  // (`BORRADO` en worker/respuestas.ts).
+  "triggers": { "crons": ["0 3 * * *"] },
   // Necesario para que Workers Builds publique previews de las ramas que no son `main`
   // (`wrangler preview`).
   "previews": {}

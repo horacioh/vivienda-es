@@ -291,6 +291,7 @@ btnCompartir.addEventListener("click", async () => {
 
 interface Opiniones {
   veda: boolean;
+  cerrado?: boolean;
   minimo: number;
   turnstile?: string;
   total?: number;
@@ -314,10 +315,14 @@ async function cargarOpiniones(recargar = false) {
   }
   if (!d.turnstile) return;
   sitekey = d.turnstile;
-  if (!hayApi) (hayApi = true), prepararCompartir();
+  if (hayApi === !!d.cerrado) (hayApi = !d.cerrado), prepararCompartir();
   $("opiniones").hidden = false;
   const estado = $("op-estado"), lista = $("op-lista");
   lista.replaceChildren();
+  if (d.cerrado) {
+    estado.textContent = "Las respuestas compartidas se borraron el 1 de enero de 2027, como indica la política de privacidad.";
+    return;
+  }
   if (d.veda) {
     estado.textContent = "La ley electoral no permite publicar sondeos en los cinco días anteriores a la votación. Volveremos a mostrar estos resultados el 29 de noviembre, tras el cierre de los colegios.";
     return;
