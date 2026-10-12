@@ -9,6 +9,7 @@ const VOTO_CORTO: Record<string, string> = { "Sí": "Sí", No: "No", "Abstenció
 
 const datos = MATRIZ.map(({ afirmacion, posturas }) => ({
   id: afirmacion.id,
+  corto: afirmacion.corto,
   posturas: Object.fromEntries(posturas.map((p) => [p.actor.id, p.valor])),
 }));
 const actores = ACTORES.map((a) => ({ id: a.id, nombre: a.nombre }));
@@ -34,7 +35,7 @@ const fmtFecha = (iso: string) =>
       ¿Qué partido vota como tú en vivienda?
     </h1>
     <p class="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink-2 text-pretty sm:text-lg">
-      Responde {AFIRMACIONES.length} afirmaciones y te comparamos con lo que votó cada partido en el Congreso entre 2024 y 2026. Cada postura enlaza a su votación oficial. Tus respuestas no salen de tu navegador.
+      Responde {AFIRMACIONES.length} afirmaciones y te comparamos con lo que votó cada partido en el Congreso entre 2024 y 2026. Cada postura enlaza a su votación oficial. Tus respuestas no salen de tu navegador, salvo que decidas compartirlas de forma anónima.
     </p>
     <div class="mt-6 flex flex-wrap gap-2">
       <a href="#cuestionario" class="btn btn-primario">Empezar el cuestionario</a>
@@ -102,6 +103,16 @@ const fmtFecha = (iso: string) =>
               </div>
             </div>
           ))}
+        </div>
+      </div>
+      <div id="compartir" class="mt-8 rounded-2xl bg-paper p-4 sm:p-5">
+        <p class="text-[0.95rem] font-semibold text-ink">¿Compartes tus respuestas de forma anónima?</p>
+        <p class="mt-1 max-w-2xl text-sm leading-relaxed text-muted text-pretty">
+          Solo se guardan tus respuestas y el día: ni tu IP, ni cookies, ni nada que te identifique. Con ellas mostramos <a href="#opiniones" class="underline underline-offset-2">qué responde la gente</a>.
+        </p>
+        <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button type="button" id="r-compartir" class="btn btn-primario">Compartir de forma anónima</button>
+          <p id="r-compartir-estado" class="text-sm font-medium text-ink-2 text-pretty" role="status"></p>
         </div>
       </div>
       <p class="mt-6 max-w-2xl text-[0.9rem] leading-relaxed text-muted text-pretty">
@@ -215,6 +226,17 @@ const fmtFecha = (iso: string) =>
     </div>
   </section>
 
+  <section id="opiniones" class="scroll-mt-4 pt-14 sm:pt-20" aria-labelledby="t-opiniones" hidden>
+    <h2 id="t-opiniones" class="font-display text-[1.75rem] font-semibold tracking-[-0.01em] sm:text-[2.25rem]">Qué responde la gente</h2>
+    <p class="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-ink-2 text-pretty">
+      Respuestas que han compartido de forma anónima quienes hicieron el cuestionario. <b class="text-ink">No es una encuesta:</b> responde quien quiere, así que no representa a la población.
+    </p>
+    <div class="mt-5 rounded-[1.25rem] bg-card p-4 shadow-card sm:p-6">
+      <p id="op-estado" class="text-sm text-muted text-pretty"></p>
+      <div id="op-lista" class="space-y-4 empty:hidden [&:not(:empty)]:mt-4"></div>
+    </div>
+  </section>
+
   <section id="metodo" class="pt-14 sm:pt-20" aria-labelledby="t-metodo">
     <h2 id="t-metodo" class="font-display text-[1.5rem] font-semibold tracking-[-0.01em] sm:text-[1.9rem]">Cómo se calcula</h2>
     <div class="mt-4 grid gap-4 text-[0.95rem] leading-relaxed text-ink-2 sm:grid-cols-2">
@@ -225,6 +247,7 @@ const fmtFecha = (iso: string) =>
       <div class="space-y-3 text-pretty">
         <p><b class="text-ink">Grupo Mixto.</b> Belarra, Santana, Sánchez Serna y Velarde (elegidos en la lista de SUMAR), BNG, Coalición Canaria y UPN no tienen grupo propio: se usa el voto de sus diputados, según los datos abiertos del Congreso.</p>
         <p><b class="text-ink">Límites.</b> Un voto no recoge todos los matices de una postura y los partidos votan a veces por motivos tácticos. Faltan los programas del 29N: los añadiremos, enlazados a la web oficial de cada partido, cuando se publiquen.</p>
+        <p><b class="text-ink">Respuestas compartidas.</b> Si compartes tus respuestas, se guardan solo ellas y el día, sin IP, cookies ni identificador; la IP se usa en el momento para frenar envíos repetidos y no se guarda. Los porcentajes se muestran a partir de 30 cuestionarios y no se publican del 24 de noviembre al cierre de los colegios el 29, como marca la ley electoral para los sondeos.</p>
       </div>
     </div>
   </section>

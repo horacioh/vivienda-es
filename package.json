@@ -8,7 +8,7 @@
     "preview": "astro preview",
     "typecheck": "astro check",
     "validate": "bun run scripts/validate-novedades.ts",
-    "test": "bun test scripts",
+    "test": "bun test scripts worker",
     "deploy": "wrangler deploy",
     "votos": "bun run scripts/fetch-votos-congreso.ts"
   },
