@@ -1,0 +1,272 @@
+---
+import Base from "../layouts/Base.astro";
+import { ACTORES, AFIRMACIONES, MATRIZ, totales, urlDatos, urlIniciativa } from "../lib/cuestionario";
+
+const etiqueta = (v: number | null) =>
+  v === null ? "sin" : v >= 0.5 ? "favor" : v <= -0.5 ? "contra" : "medio";
+const TEXTO: Record<string, string> = { favor: "A favor", contra: "En contra", medio: "Abstención o dividido", sin: "Sin voto" };
+const VOTO_CORTO: Record<string, string> = { "Sí": "Sí", No: "No", "Abstención": "Abst.", "No vota": "—" };
+
+const datos = MATRIZ.map(({ afirmacion, posturas }) => ({
+  id: afirmacion.id,
+  posturas: Object.fromEntries(posturas.map((p) => [p.actor.id, p.valor])),
+}));
+const actores = ACTORES.map((a) => ({ id: a.id, nombre: a.nombre }));
+const payload = JSON.stringify({ afirmaciones: datos, actores });
+const fmtFecha = (iso: string) =>
+  new Date(iso + "T12:00:00Z").toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+---
+<Base
+  title="Elecciones 29N: vivienda"
+  description="Compara lo que piensas sobre vivienda con lo que cada partido votó en el Congreso. Cada postura enlaza a la votación oficial."
+>
+  <section class="pb-6 pt-8 sm:pb-10 sm:pt-16">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-accent">Elecciones generales · 29 de noviembre</p>
+    <h1 class="mt-3 max-w-3xl font-display text-[2.4rem] font-semibold leading-[1.04] tracking-[-0.02em] text-balance sm:text-[3.75rem]">
+      ¿Qué partido vota como tú en vivienda?
+    </h1>
+    <p class="mt-4 max-w-xl text-[1.05rem] leading-relaxed text-ink-2 text-pretty sm:text-lg">
+      Responde {AFIRMACIONES.length} afirmaciones y te comparamos con lo que votó cada partido en el Congreso entre 2024 y 2026. Cada postura enlaza a su votación oficial. Tus respuestas no salen de tu navegador.
+    </p>
+    <div class="mt-6 flex flex-wrap gap-2">
+      <a href="#cuestionario" class="btn btn-primario">Empezar el cuestionario</a>
+      <a href="#posturas" class="btn btn-secundario">Ver qué votó cada partido</a>
+    </div>
+  </section>
+
+  <section id="cuestionario" class="scroll-mt-4" aria-label="Cuestionario">
+    <noscript>
+      <p class="rounded-2xl bg-card p-6 shadow-card">El cuestionario necesita JavaScript. Las posturas de cada partido están más abajo.</p>
+    </noscript>
+    <div id="q" class="rounded-[1.5rem] bg-card p-5 shadow-card sm:p-8" hidden>
+      <div class="flex items-center justify-between gap-3 text-sm">
+        <span id="q-tema" class="rounded-full bg-ink/5 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-ink-2"></span>
+        <span id="q-paso" class="font-medium tabular-nums text-muted"></span>
+      </div>
+      <div class="mt-3 h-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
+        <div id="q-barra" class="h-full w-0 rounded-full bg-accent transition-[width] duration-300 ease-out"></div>
+      </div>
+      <h2 id="q-texto" class="mt-6 min-h-[5.5rem] font-display text-[1.6rem] font-semibold leading-[1.15] tracking-[-0.01em] text-balance sm:min-h-[6rem] sm:text-[2.1rem]" tabindex="-1"></h2>
+      <p id="q-contexto" class="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-muted text-pretty"></p>
+      <div class="mt-6 grid gap-2 sm:grid-cols-3" role="group" aria-label="Tu respuesta">
+        <button type="button" class="resp" data-valor="1"><span class="punto bg-si"></span>De acuerdo</button>
+        <button type="button" class="resp" data-valor="0"><span class="punto bg-abst"></span>Neutral</button>
+        <button type="button" class="resp" data-valor="-1"><span class="punto bg-no"></span>En desacuerdo</button>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2.5 text-sm font-medium text-ink-2">
+          <input id="q-importa" type="checkbox" class="size-[1.1rem] accent-[var(--color-accent)]" />
+          Esto me importa mucho <span class="text-muted">(cuenta doble)</span>
+        </label>
+        <div class="flex gap-1">
+          <button type="button" id="q-atras" class="btn-texto">← Anterior</button>
+          <button type="button" id="q-saltar" class="btn-texto">Saltar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="r" class="rounded-[1.5rem] bg-card p-5 shadow-card sm:p-8" hidden>
+      <p class="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-accent">Tu resultado</p>
+      <h2 id="r-titulo" class="mt-2 font-display text-[1.9rem] font-semibold leading-[1.1] tracking-[-0.01em] text-balance sm:text-[2.4rem]" tabindex="-1">
+        Coincidencia con lo que votó cada partido
+      </h2>
+      <p id="r-resumen" class="mt-2 text-sm text-muted text-pretty"></p>
+      <ol id="r-lista" class="mt-6 space-y-2.5"></ol>
+      <p class="mt-6 max-w-2xl text-[0.9rem] leading-relaxed text-muted text-pretty">
+        Esto mide coincidencia con votos pasados en el Congreso, no con los programas del 29N, y no es una recomendación de voto. Abajo puedes ver cada votación y su fuente.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <a href="#posturas" class="btn btn-primario">Ver el detalle por tema</a>
+        <button type="button" id="r-repetir" class="btn btn-secundario">Volver a empezar</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="posturas" class="scroll-mt-4 pt-14 sm:pt-20" aria-labelledby="t-posturas">
+    <h2 id="t-posturas" class="font-display text-[1.75rem] font-semibold tracking-[-0.01em] sm:text-[2.25rem]">Qué votó cada partido</h2>
+    <p class="mt-2 max-w-2xl text-ink-2 text-pretty">
+      Una tarjeta por afirmación. El color dice si el partido votó a favor o en contra de lo que dice la afirmación; abre «Votaciones y fuentes» para ver cada voto y el documento oficial.
+    </p>
+    <ul class="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-medium text-ink-2" aria-label="Leyenda">
+      {["favor", "contra", "medio", "sin"].map((k) => <li class="inline-flex items-center gap-1.5"><span class={`marca m-${k}`}></span>{TEXTO[k]}</li>)}
+      <li id="leyenda-tu" class="inline-flex items-center gap-1.5" hidden><span class="tu-marca">Tú</span>Tu respuesta</li>
+    </ul>
+
+    <div class="mt-6 space-y-4">
+      {MATRIZ.map(({ afirmacion: a, posturas }) => (
+        <article id={`af-${a.id}`} class="afirmacion rounded-[1.25rem] bg-card p-5 shadow-card sm:p-6" data-id={a.id}>
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{a.tema}</p>
+            <p class="tu-resp hidden shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"></p>
+          </div>
+          <h3 class="mt-1.5 font-display text-[1.2rem] font-semibold leading-snug tracking-[-0.005em] text-balance sm:text-[1.35rem]">{a.texto}</h3>
+          <ul class="mt-4 grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
+            {posturas.map((p) => {
+              const k = etiqueta(p.valor);
+              return (
+                <li class={`celda c-${k}`} data-actor={p.actor.id} title={`${p.actor.nombre}: ${TEXTO[k]}`}>
+                  <span class={`marca m-${k}`} aria-hidden="true"></span>
+                  <span class="truncate">{p.actor.corto ?? p.actor.nombre}</span>
+                  <span class="sr-only">: {TEXTO[k]}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <details class="group mt-4">
+            <summary class="inline-flex min-h-10 cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent-dark">
+              Votaciones y fuentes ({a.evidencias.length})
+              <svg class="size-4 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5.5 8 4.5 4.5L14.5 8"/></svg>
+            </summary>
+            <p class="mt-2 text-sm leading-relaxed text-ink-2 text-pretty">{a.contexto}</p>
+            {a.evidencias.map((e, i) => {
+              const t = totales(e.votacion);
+              return (
+                <div class="mt-4 border-t border-line pt-4">
+                  <p class="text-sm font-semibold text-ink">
+                    <time datetime={e.fecha}>{fmtFecha(e.fecha)}</time> · {e.iniciativa}
+                  </p>
+                  <p class="mt-0.5 text-sm text-muted">
+                    {e.que_se_voto} {t && <span class="tabular-nums">Resultado: {t.si} sí, {t.no} no, {t.abstencion} abst.</span>}
+                  </p>
+                  <ul class="mt-2.5 flex flex-wrap gap-1.5 text-xs">
+                    {posturas.map((p) => {
+                      const ev = p.evidencias[i];
+                      const n = Object.values(ev.recuento).reduce((s, x) => s + (x ?? 0), 0);
+                      const desglose = Object.entries(ev.recuento).map(([k, v]) => `${v} ${k.toLowerCase()}`).join(", ");
+                      return (
+                        <li class={`voto v-${ev.voto ? ev.voto.replace(/\s/g, "") : "nada"}`} title={desglose}>
+                          {p.actor.corto ?? p.actor.nombre} <b>{ev.voto ? VOTO_CORTO[ev.voto] : "—"}</b>{!ev.unanime && n > 1 && <span class="text-muted"> (dividido)</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold">
+                    {e.texto_url && <a class="enlace" href={e.texto_url} target="_blank" rel="noopener">Texto oficial →</a>}
+                    <a class="enlace" href={urlIniciativa(e.expediente)} target="_blank" rel="noopener">Ficha en el Congreso ({e.expediente}) →</a>
+                    <a class="enlace" href={urlDatos(e.votacion)} target="_blank" rel="noopener">Votación (datos abiertos) →</a>
+                  </p>
+                </div>
+              );
+            })}
+          </details>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section id="metodo" class="pt-14 sm:pt-20" aria-labelledby="t-metodo">
+    <h2 id="t-metodo" class="font-display text-[1.5rem] font-semibold tracking-[-0.01em] sm:text-[1.9rem]">Cómo se calcula</h2>
+    <div class="mt-4 grid gap-4 text-[0.95rem] leading-relaxed text-ink-2 sm:grid-cols-2">
+      <div class="space-y-3 text-pretty">
+        <p><b class="text-ink">Qué se compara.</b> Cada afirmación resume una iniciativa votada en el Pleno del Congreso en la XV legislatura. La postura de un partido es lo que votó la mayoría de sus diputados: a favor cuenta +1, en contra −1 y abstención 0. Si hay varias votaciones sobre lo mismo, se hace la media.</p>
+        <p><b class="text-ink">La puntuación.</b> En cada afirmación, coincidir del todo da 100 % y lo contrario 0 %; neutral frente a un voto a favor o en contra da 50 %. «Me importa mucho» cuenta doble. Las afirmaciones que saltas, o en las que un partido no votó, no cuentan.</p>
+      </div>
+      <div class="space-y-3 text-pretty">
+        <p><b class="text-ink">Grupo Mixto.</b> Belarra, Santana, Sánchez Serna y Velarde (elegidos en la lista de SUMAR), BNG, Coalición Canaria y UPN no tienen grupo propio: se usa el voto de sus diputados, según los datos abiertos del Congreso.</p>
+        <p><b class="text-ink">Límites.</b> Un voto no recoge todos los matices de una postura y los partidos votan a veces por motivos tácticos. Faltan los programas del 29N: los añadiremos, enlazados a la web oficial de cada partido, cuando se publiquen.</p>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/json" id="datos-cuestionario" set:html={payload} />
+  <script>
+    import "../scripts/cuestionario.ts";
+  </script>
+</Base>
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1.15rem;
+    border-radius: 9999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition-property: background-color, color, box-shadow, scale;
+    transition-duration: 150ms;
+  }
+  .btn:active { scale: 0.96; }
+  .btn-primario { background: var(--color-ink); color: var(--color-paper); }
+  .btn-primario:hover { background: #000; }
+  .btn-secundario { background: var(--color-card); color: var(--color-ink); box-shadow: var(--shadow-card); }
+  .btn-secundario:hover { background: #fff; }
+  .btn-texto {
+    min-height: 2.75rem;
+    padding: 0 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    transition-property: background-color, color, scale;
+    transition-duration: 150ms;
+  }
+  .btn-texto:hover { background: rgb(23 20 15 / 0.05); color: var(--color-ink); }
+  .btn-texto:active { scale: 0.96; }
+  .btn-texto:disabled { opacity: 0.35; pointer-events: none; }
+  .resp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3.5rem;
+    border-radius: 1rem;
+    background: var(--color-paper);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+    font-weight: 600;
+    color: var(--color-ink);
+    transition-property: background-color, box-shadow, color, scale;
+    transition-duration: 150ms;
+  }
+  .resp:hover { background: #fff; box-shadow: inset 0 0 0 1px rgb(23 20 15 / 0.2); }
+  .resp:active { scale: 0.96; }
+  .resp[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); box-shadow: none; }
+  .resp:focus-visible, .btn:focus-visible, .btn-texto:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .punto { width: 0.6rem; height: 0.6rem; border-radius: 9999px; }
+  .marca { flex-shrink: 0; width: 0.7rem; height: 0.7rem; border-radius: 9999px; }
+  .m-favor { background: var(--color-si); }
+  .m-contra { background: var(--color-no); }
+  .m-medio { background: var(--color-abst); }
+  .m-sin { box-shadow: inset 0 0 0 1.5px var(--color-abst); }
+  .celda {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    min-height: 2.5rem;
+    padding: 0 0.7rem;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition-property: box-shadow, opacity;
+    transition-duration: 200ms;
+  }
+  .c-favor { background: color-mix(in oklab, var(--color-si) 11%, var(--color-card)); color: color-mix(in oklab, var(--color-si) 70%, black); }
+  .c-contra { background: color-mix(in oklab, var(--color-no) 10%, var(--color-card)); color: color-mix(in oklab, var(--color-no) 75%, black); }
+  .c-medio { background: rgb(23 20 15 / 0.05); color: var(--color-ink-2); }
+  .c-sin { background: transparent; box-shadow: inset 0 0 0 1px var(--color-line); color: var(--color-muted); font-weight: 500; }
+  .celda.coincide { box-shadow: inset 0 0 0 2px currentColor; }
+  .celda.lejos { opacity: 0.55; }
+  .tu-marca {
+    display: inline-grid;
+    place-items: center;
+    height: 1.1rem;
+    padding: 0 0.35rem;
+    border-radius: 9999px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: 0.62rem;
+    font-weight: 700;
+  }
+  .voto {
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.5rem;
+    background: rgb(23 20 15 / 0.04);
+    color: var(--color-ink-2);
+  }
+  .voto b { font-weight: 700; }
+  .v-Sí b { color: var(--color-si); }
+  .v-No b { color: var(--color-no); }
+  .enlace { color: var(--color-accent); }
+  .enlace:hover { color: var(--color-accent-dark); text-decoration: underline; text-underline-offset: 3px; }
+</style>
