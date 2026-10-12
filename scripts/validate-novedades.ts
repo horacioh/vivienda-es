@@ -74,7 +74,9 @@ export function validarNovedades(ficheros: Fichero[]): string[] {
       continue;
     }
 
-    const claveUrl = `${normalizarUrl(url)}|${d.tipo}`;
+    const r = d.resultado as Record<string, unknown> | undefined;
+    const votos = d.tipo === "votacion" && r && typeof r === "object" ? `|${r.si}-${r.no}-${r.abstencion ?? 0}` : "";
+    const claveUrl = `${normalizarUrl(url)}|${d.tipo}${votos}`;
     const previo = porUrl.get(claveUrl);
     if (previo) err(`duplicada: misma fuente_url y tipo que ${previo}`);
     else porUrl.set(claveUrl, nombre);

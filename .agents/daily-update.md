@@ -57,7 +57,10 @@ Antes de crear un fichero, busca en `src/content/novedades/` (por ejemplo `grep 
 - Si una novedad existente cambió de situación (p. ej. una propuesta convalidada, rechazada o caducada),
   **actualiza su `estado`** y, si el cambio es noticia en sí (una votación), crea además una novedad
   nueva de `tipo: votacion` con la fuente de esa votación.
-- `bun run validate` detecta duplicados por URL normalizada + tipo y por título + fecha.
+- Si una misma fuente recoge varias votaciones (p. ej. dos convalidaciones en una nota de prensa),
+  crea **una novedad por votación**, cada una con su `resultado`.
+- `bun run validate` detecta duplicados por URL normalizada + tipo (+ `resultado` en votaciones) y por
+  título + fecha.
 
 ## 3. Crear ficheros
 
