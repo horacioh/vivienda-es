@@ -13,6 +13,14 @@ const datos = MATRIZ.map(({ afirmacion, posturas }) => ({
 }));
 const actores = ACTORES.map((a) => ({ id: a.id, nombre: a.nombre }));
 const payload = JSON.stringify({ afirmaciones: datos, actores });
+const valor = (i: number, actor: string) => MATRIZ[i].posturas.find((p) => p.actor.id === actor)?.valor ?? null;
+const coincidencia = (x: string, y: string) =>
+  MATRIZ.reduce((s, _, i) => {
+    const a = valor(i, x), b = valor(i, y);
+    return a === null || b === null ? s : s + 1 - Math.abs(a - b) / 2;
+  }, 0);
+const orden = [...ACTORES].sort((a, b) => coincidencia(a.id, "pp") - coincidencia(b.id, "pp"));
+const COLUMNAS = [["contra", "En contra"], ["medio", "Dividido"], ["favor", "A favor"]] as const;
 const fmtFecha = (iso: string) =>
   new Date(iso + "T12:00:00Z").toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 ---
@@ -72,6 +80,30 @@ const fmtFecha = (iso: string) =>
       </h2>
       <p id="r-resumen" class="mt-2 text-sm text-muted text-pretty"></p>
       <ol id="r-lista" class="mt-6 space-y-2.5"></ol>
+      <div class="mt-8 border-t border-line pt-6">
+        <h3 class="font-display text-xl font-semibold tracking-[-0.01em]">Tema a tema</h3>
+        <p class="mt-1 text-sm text-muted text-pretty">Cómo votó cada partido en cada afirmación. El recuadro marca tu respuesta.</p>
+        <div class="mt-4 space-y-4">
+          {MATRIZ.map(({ afirmacion: a }, i) => (
+            <div class="tema" data-i={i}>
+              <p class="flex items-baseline justify-between gap-3 text-sm font-semibold text-ink">
+                <a href={`#af-${a.id}`} class="hover:underline hover:underline-offset-4">{a.corto}</a>
+                <span class="tema-nota shrink-0 text-xs font-medium text-muted"></span>
+              </p>
+              <div class="tres">
+                {COLUMNAS.map(([k, t]) => (
+                  <div class={`col col-${k}`} data-col={k}>
+                    <p class="ct"><span class={`marca m-${k}`} aria-hidden="true"></span>{t}<span class="tu-marca ml-auto" hidden>Tú</span></p>
+                    <div class="flex flex-wrap gap-1">
+                      {orden.filter((x) => etiqueta(valor(i, x.id)) === k).map((x) => <span class="chip">{x.corto ?? x.nombre}</span>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       <p class="mt-6 max-w-2xl text-[0.9rem] leading-relaxed text-muted text-pretty">
         Esto mide coincidencia con votos pasados en el Congreso, no con los programas del 29N, y no es una recomendación de voto. Abajo puedes ver cada votación y su fuente.
       </p>
@@ -85,12 +117,41 @@ const fmtFecha = (iso: string) =>
   <section id="posturas" class="scroll-mt-4 pt-14 sm:pt-20" aria-labelledby="t-posturas">
     <h2 id="t-posturas" class="font-display text-[1.75rem] font-semibold tracking-[-0.01em] sm:text-[2.25rem]">Qué votó cada partido</h2>
     <p class="mt-2 max-w-2xl text-ink-2 text-pretty">
-      Una tarjeta por afirmación. El color dice si el partido votó a favor o en contra de lo que dice la afirmación; abre «Votaciones y fuentes» para ver cada voto y el documento oficial.
+      Una tarjeta por afirmación. El color y el símbolo dicen si el partido votó a favor o en contra de lo que dice la afirmación; abre «Votaciones y fuentes» para ver cada voto y el documento oficial.
     </p>
     <ul class="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs font-medium text-ink-2" aria-label="Leyenda">
-      {["favor", "contra", "medio", "sin"].map((k) => <li class="inline-flex items-center gap-1.5"><span class={`marca m-${k}`}></span>{TEXTO[k]}</li>)}
+      {["favor", "contra", "medio", "sin"].map((k) => <li class="inline-flex items-center gap-1.5"><span class={`marca m-${k}`} aria-hidden="true"></span>{TEXTO[k]}</li>)}
       <li id="leyenda-tu" class="inline-flex items-center gap-1.5" hidden><span class="tu-marca">Tú</span>Tu respuesta</li>
     </ul>
+
+    <div class="mt-6 rounded-[1.25rem] bg-card p-4 shadow-card sm:p-6">
+      <h3 class="font-display text-xl font-semibold tracking-[-0.01em]">De un vistazo</h3>
+      <p class="mt-1 text-sm text-muted text-pretty">Una fila por partido, una columna por afirmación. Ordenados de menos a más coincidencia con el PP. Toca una casilla para ver sus votaciones.</p>
+      <div class="-mx-1 mt-3 overflow-x-auto px-1">
+        <table class="mapa">
+          <thead>
+            <tr><td></td>{MATRIZ.map(({ afirmacion: a }) => <th scope="col"><span>{a.corto}</span></th>)}</tr>
+          </thead>
+          <tbody>
+            {orden.map((x) => (
+              <tr>
+                <th scope="row">{x.corto ?? x.nombre}</th>
+                {MATRIZ.map(({ afirmacion: a }, i) => {
+                  const k = etiqueta(valor(i, x.id));
+                  return (
+                    <td>
+                      <a href={`#af-${a.id}`} class={`casilla m-${k}`} title={`${x.nombre} · ${a.corto}: ${TEXTO[k]}`}>
+                        <span class="sr-only">{x.nombre}, {a.corto}: {TEXTO[k]}</span>
+                      </a>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="mt-6 space-y-4">
       {MATRIZ.map(({ afirmacion: a, posturas }) => (
@@ -223,11 +284,33 @@ const fmtFecha = (iso: string) =>
   .resp[aria-pressed="true"] { background: var(--color-ink); color: var(--color-paper); box-shadow: none; }
   .resp:focus-visible, .btn:focus-visible, .btn-texto:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
   .punto { width: 0.6rem; height: 0.6rem; border-radius: 9999px; }
-  .marca { flex-shrink: 0; width: 0.7rem; height: 0.7rem; border-radius: 9999px; }
+  .marca, .casilla { display: inline-grid; place-items: center; flex-shrink: 0; color: #fff; font-weight: 800; line-height: 1; }
+  .marca { width: 1rem; height: 1rem; border-radius: 9999px; font-size: 0.62rem; }
   .m-favor { background: var(--color-si); }
   .m-contra { background: var(--color-no); }
-  .m-medio { background: var(--color-abst); }
-  .m-sin { box-shadow: inset 0 0 0 1.5px var(--color-abst); }
+  .m-medio { background: var(--color-abst); color: var(--color-ink); }
+  .m-sin { background: repeating-linear-gradient(45deg, var(--color-line) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px var(--color-line); }
+  .m-favor::after { content: "✓"; }
+  .m-contra::after { content: "✕"; }
+  .m-medio::after { content: "–"; }
+  .mapa { border-collapse: separate; border-spacing: 3px; margin-left: -3px; }
+  .mapa thead th { height: 9.25rem; padding: 0 0 0.3rem; vertical-align: bottom; }
+  .mapa thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.72rem; font-weight: 600; white-space: nowrap; color: var(--color-ink-2); }
+  .mapa tbody th { padding-right: 0.4rem; text-align: right; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+  .mapa td { padding: 0; }
+  .casilla { width: 1.6rem; height: 1.75rem; border-radius: 0.45rem; font-size: 0.85rem; transition-property: scale; transition-duration: 120ms; }
+  .casilla:hover { scale: 1.08; }
+  .casilla:active { scale: 0.96; }
+  .casilla:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 1px; }
+  @media (min-width: 640px) { .casilla { width: 2.6rem; height: 2rem; font-size: 0.95rem; } .mapa thead th span { font-size: 0.78rem; } .mapa tbody th { font-size: 0.8rem; padding-right: 0.5rem; } }
+  .tres { margin-top: 0.4rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.35rem; }
+  .col { min-height: 3.25rem; padding: 0.5rem; border-radius: 0.75rem; background: rgb(23 20 15 / 0.035); }
+  .col-contra { background: color-mix(in oklab, var(--color-no) 8%, var(--color-card)); }
+  .col-favor { background: color-mix(in oklab, var(--color-si) 8%, var(--color-card)); }
+  .col.mia { box-shadow: inset 0 0 0 2px var(--color-ink); }
+  .ct { display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.4rem; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink-2); }
+  .ct .marca { width: 0.85rem; height: 0.85rem; font-size: 0.52rem; }
+  .chip { padding: 0.1rem 0.45rem; border-radius: 9999px; background: var(--color-card); box-shadow: 0 0 0 1px rgb(23 20 15 / 0.1); font-size: 0.72rem; font-weight: 600; white-space: nowrap; color: var(--color-ink); }
   .celda {
     display: flex;
     align-items: center;

@@ -20,6 +20,8 @@ export interface Evidencia {
 export interface Afirmacion {
   id: string;
   tema: string;
+  /** Etiqueta breve para el mapa de posturas. */
+  corto: string;
   texto: string;
   contexto: string;
   evidencias: Evidencia[];
@@ -29,6 +31,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "prorroga-alquiler",
     tema: "Alquiler",
+    corto: "Prórroga y tope del alquiler",
     texto:
       "En una crisis de precios, el Gobierno debería poder prorrogar los contratos de alquiler y limitar la subida anual de la renta.",
     contexto:
@@ -48,6 +51,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "alquiler-temporada",
     tema: "Alquiler",
+    corto: "Regular temporada y habitaciones",
     texto: "Los alquileres de temporada y de habitaciones deberían regularse por ley, como el alquiler de vivienda habitual.",
     contexto:
       "Hoy los contratos de temporada y de habitaciones quedan fuera de buena parte de las reglas del alquiler de vivienda habitual. Se votaron dos proposiciones de ley para regularlos.",
@@ -73,6 +77,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "pisos-turisticos",
     tema: "Pisos turísticos",
+    corto: "Limitar pisos turísticos",
     texto: "El Estado debería controlar la publicidad y la contratación de pisos turísticos.",
     contexto: "Proposición de ley de EH Bildu sobre control y regulación de la publicidad y contratación de los pisos turísticos.",
     evidencias: [
@@ -89,6 +94,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "especulacion",
     tema: "Compra de vivienda",
+    corto: "Medidas contra la especulación",
     texto: "El Estado debería intervenir para frenar la compra de viviendas con fines especulativos.",
     contexto:
       "Dos iniciativas pedían al Gobierno medidas contra la especulación inmobiliaria: una moción de ERC (2025) y una proposición no de ley de SUMAR, votada con una enmienda pactada con el PSOE (2026).",
@@ -114,6 +120,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "urbanismo",
     tema: "Suelo y construcción",
+    corto: "Seguridad jurídica urbanística",
     texto:
       "Hay que cambiar las leyes para que los planes urbanísticos no se anulen tan fácilmente en los tribunales y se construya más rápido.",
     contexto:
@@ -132,6 +139,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "ocupacion",
     tema: "Ocupación",
+    corto: "Más dureza contra la ocupación",
     texto: "Hacen falta leyes más duras y desalojos más rápidos contra la ocupación ilegal de viviendas.",
     contexto: "Se votaron dos proposiciones de ley orgánica contra la ocupación ilegal: una de Junts (2025) y otra del PP (2026).",
     evidencias: [
@@ -156,6 +164,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "sareb",
     tema: "Vivienda pública",
+    corto: "Activos de la Sareb a Galicia",
     texto: "La Sareb debería transferir a la Xunta de Galicia las viviendas y suelos que tiene en Galicia, para que los gestione como vivienda pública.",
     contexto: "Proposición no de ley del BNG para transferir a Galicia los activos inmobiliarios de la Sareb situados allí. Es la única votación del Pleno sobre traspasar activos de la Sareb a una comunidad; no hubo una votación general para todas.",
     evidencias: [
@@ -172,6 +181,7 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "prioridad-nacionales",
     tema: "Vivienda pública",
+    corto: "Prioridad a nacionales",
     texto: "Las personas con nacionalidad española deberían tener prioridad para comprar, alquilar o recibir una vivienda social.",
     contexto: "Moción de VOX que pedía que «los españoles siempre vayan primero para comprar, alquilar o recibir una vivienda social».",
     evidencias: [
