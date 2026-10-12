@@ -29,12 +29,34 @@ export const MINIMO = 30;
 
 export const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
-/** Checks a Cloudflare Turnstile token. Without a configured secret, nothing is accepted. */
-export async function verificarTurnstile(token: unknown, secret: string | undefined, f: typeof fetch = fetch) {
-  if (!secret || typeof token !== "string" || !token || token.length > 2048) return false;
-  const res = await f(SITEVERIFY, { method: "POST", body: new URLSearchParams({ secret, response: token }) });
-  if (!res.ok) return false;
-  return ((await res.json()) as { success?: boolean }).success === true;
+export const ACCION = "compartir";
+
+export const hostnames = (v: string | undefined) =>
+  new Set((v ?? "").split(",").map((h) => h.trim()).filter(Boolean));
+
+/** Canonical siteverify: success, the expected action and an approved frontend hostname. */
+export async function verificarTurnstile(
+  token: unknown,
+  o: { secret?: string; hostnames: Set<string>; ip?: string | null },
+  f: typeof fetch = fetch,
+) {
+  if (!o.secret || typeof token !== "string" || !token || token.length > 2048 || o.hostnames.size === 0) return false;
+  let r: { success?: boolean; action?: string; hostname?: string };
+  try {
+    const body = new URLSearchParams({ secret: o.secret, response: token });
+    if (o.ip) body.set("remoteip", o.ip);
+    const res = await f(SITEVERIFY, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      signal: AbortSignal.timeout(10_000),
+      body,
+    });
+    if (!res.ok) return false;
+    r = await res.json();
+  } catch {
+    return false;
+  }
+  return r.success === true && r.action === ACCION && !!r.hostname && o.hostnames.has(r.hostname);
 }
 
 /** Seconds a /api/resultados response may be cached: never past the start of the blackout. */

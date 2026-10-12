@@ -219,6 +219,7 @@ async function token(): Promise<string | null> {
   if (widget === undefined) {
     widget = ts.render($("r-turnstile"), {
       sitekey,
+      action: "compartir",
       execution: "execute",
       appearance: "interaction-only",
       language: "es",
@@ -226,9 +227,13 @@ async function token(): Promise<string | null> {
       "error-callback": () => pedirToken?.(null),
       "timeout-callback": () => pedirToken?.(null),
     });
-  } else ts.reset(widget);
+  }
   ts.execute(widget);
   return listo;
+}
+
+function reiniciarTurnstile() {
+  if (widget !== undefined) window.turnstile?.reset(widget);
 }
 
 let hayApi = false;
@@ -268,11 +273,13 @@ btnCompartir.addEventListener("click", async () => {
     if (res.status === 429) error = "Has enviado varias veces seguidas. Prueba dentro de un minuto.";
     if (!res.ok) throw new Error(error);
   } catch {
+    reiniciarTurnstile();
     enviando = false;
     btnCompartir.disabled = false;
     estadoCompartir.textContent = error;
     return;
   }
+  reiniciarTurnstile();
   enviando = false;
   try {
     localStorage.setItem(COMPARTIDO, new Date().toISOString().slice(0, 10));

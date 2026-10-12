@@ -1,6 +1,6 @@
 // Worker delante de los static assets: solo atiende /api/*; el resto lo sirve `dist/`.
 // Las respuestas compartidas se guardan sin IP, cookies ni identificador: solo el día y las respuestas.
-import { enVeda, maxAge, resultados, validar, verificarTurnstile, type Fila } from "./respuestas";
+import { enVeda, hostnames, maxAge, resultados, validar, verificarTurnstile, type Fila } from "./respuestas";
 
 interface D1Result<T> { results: T[] }
 interface D1Stmt { bind(...v: unknown[]): D1Stmt; run(): Promise<unknown>; all<T>(): Promise<D1Result<T>>; first<T>(): Promise<T | null> }
@@ -10,6 +10,7 @@ interface Env {
   LIMITE: { limit(o: { key: string }): Promise<{ success: boolean }> };
   TURNSTILE_SITEKEY: string;
   TURNSTILE_SECRET?: string;
+  TURNSTILE_HOSTNAMES?: string;
 }
 
 const ESQUEMA = "CREATE TABLE IF NOT EXISTS envios (id INTEGER PRIMARY KEY, fecha TEXT NOT NULL, respuestas TEXT NOT NULL)";
@@ -34,7 +35,12 @@ export default {
       const body = await req.json().catch(() => null);
       const envio = validar(body);
       if (!envio) return json({ error: "Respuestas no válidas" }, 400);
-      if (!(await verificarTurnstile((body as { token?: unknown }).token, env.TURNSTILE_SECRET)))
+      const humano = await verificarTurnstile((body as { token?: unknown }).token, {
+        secret: env.TURNSTILE_SECRET,
+        hostnames: hostnames(env.TURNSTILE_HOSTNAMES),
+        ip: req.headers.get("cf-connecting-ip"),
+      });
+      if (!humano)
         return json({ error: "No se ha podido comprobar que no eres un robot" }, 403);
       const fecha = new Date().toISOString().slice(0, 10);
       await (await db(env)).prepare("INSERT INTO envios (fecha, respuestas) VALUES (?, ?)").bind(fecha, JSON.stringify(envio)).run();

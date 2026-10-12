@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MINIMO, VEDA, enVeda, maxAge, resultados, validar, verificarTurnstile } from "./respuestas";
+import { MINIMO, VEDA, enVeda, maxAge, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -50,14 +50,31 @@ describe("maxAge", () => {
 });
 
 describe("verificarTurnstile", () => {
+  const hs = hostnames("vivienda-es.hhg.app");
+  const o = { secret: "s", hostnames: hs };
   const responde = (r: unknown, ok = true) => (async () => new Response(JSON.stringify(r), { status: ok ? 200 : 500 })) as unknown as typeof fetch;
-  test("acepta un token válido", async () => expect(await verificarTurnstile("t", "s", responde({ success: true }))).toBe(true));
-  test("rechaza si Cloudflare dice que no", async () => expect(await verificarTurnstile("t", "s", responde({ success: false }))).toBe(false));
-  test("rechaza si Cloudflare falla", async () => expect(await verificarTurnstile("t", "s", responde({}, false))).toBe(false));
-  test("sin secret o sin token no se acepta nada", async () => {
+  const bueno = { success: true, action: ACCION, hostname: "vivienda-es.hhg.app" };
+  test("acepta éxito con la acción y el hostname esperados", async () => expect(await verificarTurnstile("t", o, responde(bueno))).toBe(true));
+  test("rechaza otra acción", async () => expect(await verificarTurnstile("t", o, responde({ ...bueno, action: "login" }))).toBe(false));
+  test("rechaza sin acción (claves de prueba)", async () => expect(await verificarTurnstile("t", o, responde({ success: true, hostname: "vivienda-es.hhg.app" }))).toBe(false));
+  test("rechaza otro hostname", async () => expect(await verificarTurnstile("t", o, responde({ ...bueno, hostname: "localhost" }))).toBe(false));
+  test("rechaza si Cloudflare dice que no", async () => expect(await verificarTurnstile("t", o, responde({ ...bueno, success: false }))).toBe(false));
+  test("rechaza si Cloudflare falla o no responde", async () => {
+    expect(await verificarTurnstile("t", o, responde({}, false))).toBe(false);
+    const cae = (async () => { throw new Error("red"); }) as unknown as typeof fetch;
+    expect(await verificarTurnstile("t", o, cae)).toBe(false);
+  });
+  test("sin secret, sin hostnames o sin token no llama a Cloudflare", async () => {
     const nunca = (() => { throw new Error("no debería llamar"); }) as unknown as typeof fetch;
-    expect(await verificarTurnstile("t", undefined, nunca)).toBe(false);
-    expect(await verificarTurnstile("", "s", nunca)).toBe(false);
-    expect(await verificarTurnstile(42, "s", nunca)).toBe(false);
+    expect(await verificarTurnstile("t", { ...o, secret: undefined }, nunca)).toBe(false);
+    expect(await verificarTurnstile("t", { ...o, hostnames: hostnames(" , ") }, nunca)).toBe(false);
+    expect(await verificarTurnstile("", o, nunca)).toBe(false);
+    expect(await verificarTurnstile("x".repeat(2049), o, nunca)).toBe(false);
+  });
+  test("envía remoteip si hay IP", async () => {
+    let enviado = "";
+    const espia = (async (_u: string, i: RequestInit) => ((enviado = String(i.body)), new Response(JSON.stringify(bueno)))) as unknown as typeof fetch;
+    await verificarTurnstile("t", { ...o, ip: "203.0.113.1" }, espia);
+    expect(enviado).toContain("remoteip=203.0.113.1");
   });
 });

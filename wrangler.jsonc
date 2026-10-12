@@ -24,7 +24,9 @@
   // secreta va como secret del Worker: `TURNSTILE_SECRET` (Settings → Variables and Secrets).
   // En local, `.dev.vars` (ver README).
   "vars": {
-    "TURNSTILE_SITEKEY": "1x00000000000000000000AA"
+    "TURNSTILE_SITEKEY": "0x4AAAAAAFUnlcYpHwDMV9Iy",
+    // Hostnames de la web desde los que se acepta un token (siteverify devuelve `hostname`).
+    "TURNSTILE_HOSTNAMES": "vivienda-es.hhg.app"
   },
   "ratelimits": [
     {
