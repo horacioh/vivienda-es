@@ -47,6 +47,19 @@ const ultima = novedades[0]?.data.fecha;
         <dd class="mt-0.5 font-display text-2xl font-semibold tabular-nums">{partidos.length}</dd>
       </div>
     </dl>
+    <a
+      href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/elecciones`}
+      class="group mt-4 flex max-w-xl flex-col gap-3 rounded-2xl bg-ink p-4 text-paper shadow-card transition-transform duration-150 active:scale-[0.98] sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5"
+    >
+      <span>
+        <span class="block text-[0.68rem] font-bold uppercase tracking-[0.14em] text-paper/60">Elecciones generales · 29 de noviembre</span>
+        <span class="mt-1 block font-display text-xl font-semibold leading-snug tracking-[-0.01em] text-balance">¿Qué partido vota como tú en vivienda?</span>
+        <span class="mt-1 block text-sm leading-relaxed text-paper/70 text-pretty">8 afirmaciones comparadas con lo que votó cada partido en el Congreso.</span>
+      </span>
+      <span class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full bg-paper px-5 text-sm font-semibold text-ink transition-colors group-hover:bg-white">
+        Hacer el cuestionario <span aria-hidden="true" class="ml-1.5 transition-transform duration-150 group-hover:translate-x-0.5">→</span>
+      </span>
+    </a>
   </section>
 
   <form
