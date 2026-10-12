@@ -116,6 +116,11 @@ describe("maxAge", () => {
     expect(maxAge(Date.parse("2026-10-12T23:59:00Z"))).toBe(60);
     expect(maxAge(Date.parse("2026-10-12T23:59:59.500Z"))).toBe(0);
   });
+  test("en el último segundo antes de la veda, 0", () => {
+    expect(maxAge(VEDA.desde - 500)).toBe(0);
+    expect(maxAge(VEDA.desde - 1)).toBe(0);
+    expect(maxAge(VEDA.desde - 1000)).toBe(1);
+  });
   test("durante y después de la veda, 5 minutos", () => {
     expect(maxAge(VEDA.desde + 1)).toBe(300);
     expect(maxAge(VEDA.hasta + 1)).toBe(300);

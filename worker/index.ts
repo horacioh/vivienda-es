@@ -49,11 +49,17 @@ export default {
     }
 
     if (pathname === "/api/resultados") {
-      const ahora = Date.now();
-      const cache = `public, max-age=${maxAge(ahora)}`;
-      if (enVeda(ahora) || cerrado(ahora)) return json({ ...resultados(0, [], ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
+      const hasta = corte(Date.now());
+      // Re-read the clock when responding: the queries below may cross the start of the blackout
+      // or midnight (then the snapshot is already stale and must not be cached).
+      const responder = (total: number, filas: Fila[]) => {
+        const ahora = Date.now();
+        const segundos = corte(ahora) === hasta ? maxAge(ahora) : 0;
+        const cache = segundos > 0 ? `public, max-age=${segundos}` : "no-store";
+        return json({ ...resultados(total, filas, ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
+      };
+      if (enVeda(Date.now()) || cerrado(Date.now())) return responder(0, []);
       const d = await db(env);
-      const hasta = corte(ahora);
       const total = (await d.prepare("SELECT COUNT(*) AS n FROM envios WHERE fecha < ?").bind(hasta).first<{ n: number }>())?.n ?? 0;
       const { results } = await d
         .prepare(
@@ -66,7 +72,7 @@ export default {
         )
         .bind(hasta)
         .all<Fila>();
-      return json({ ...resultados(total, results, ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
+      return responder(total, results);
     }
 
     if (pathname.startsWith("/api/")) return json({ error: "No encontrado" }, 404);
