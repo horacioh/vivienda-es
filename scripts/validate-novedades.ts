@@ -116,10 +116,15 @@ export function validarNovedades(ficheros: Fichero[]): string[] {
 }
 
 export function leerDirectorio(dir = DIR): Fichero[] {
-  return readdirSync(dir)
-    .filter((f) => f.endsWith(".md") && f !== "README.md")
-    .sort()
-    .map((nombre) => ({ nombre, contenido: readFileSync(join(dir, nombre), "utf8") }));
+  try {
+    return readdirSync(dir)
+      .filter((f) => f.endsWith(".md") && f !== "README.md")
+      .sort()
+      .map((nombre) => ({ nombre, contenido: readFileSync(join(dir, nombre), "utf8") }));
+  } catch {
+    // El directorio desaparece una vez las novedades viven solo en Seed.
+    return [];
+  }
 }
 
 if (import.meta.main) {

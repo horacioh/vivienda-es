@@ -1,8 +1,8 @@
 import { defineCollection } from "astro:content";
-import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 import { esFuenteOficial } from "./lib/fuentes";
 import { ESTADOS, TIPOS } from "./lib/novedades";
+import { novedadesSeedLoader } from "./lib/seed-loader";
 
 const voto = z.object({
   grupo: z.string(),
@@ -12,11 +12,7 @@ const voto = z.object({
 });
 
 const novedades = defineCollection({
-  loader: glob({
-    base: "./src/content/novedades",
-    pattern: ["*.md", "!README.md"],
-    generateId: ({ entry }) => entry.replace(/\.md$/, ""),
-  }),
+  loader: novedadesSeedLoader(),
   schema: z.object({
     fecha: z.date(),
     titulo: z.string().min(1),
