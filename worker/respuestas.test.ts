@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MINIMO, VEDA, enVeda, resultados, validar } from "./respuestas";
+import { MINIMO, VEDA, enVeda, maxAge, resultados, validar } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -37,5 +37,14 @@ describe("resultados", () => {
     expect(resultados(40, [fila, { ...fila, id: "otra" }], fuera).afirmaciones).toEqual({
       urbanismo: { favor: 20, neutral: 5, contra: 10, importa: 3 },
     });
+  });
+});
+
+describe("maxAge", () => {
+  test("5 minutos lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(300));
+  test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 60_000)).toBe(60));
+  test("durante y después de la veda, 5 minutos", () => {
+    expect(maxAge(VEDA.desde + 1)).toBe(300);
+    expect(maxAge(VEDA.hasta + 1)).toBe(300);
   });
 });

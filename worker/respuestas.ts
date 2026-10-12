@@ -27,6 +27,12 @@ export const enVeda = (t: number) => t >= VEDA.desde && t < VEDA.hasta;
 /** Por debajo de este número de envíos no se publican porcentajes. */
 export const MINIMO = 30;
 
+/** Seconds a /api/resultados response may be cached: never past the start of the blackout. */
+export function maxAge(ahora: number, normal = 300) {
+  const hastaVeda = Math.floor((VEDA.desde - ahora) / 1000);
+  return hastaVeda > 0 ? Math.min(normal, hastaVeda) : normal;
+}
+
 export interface Fila { id: string; favor: number; neutral: number; contra: number; importa: number }
 
 export function resultados(total: number, filas: Fila[], ahora: number) {

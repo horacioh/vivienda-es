@@ -1,6 +1,6 @@
 // Worker delante de los static assets: solo atiende /api/*; el resto lo sirve `dist/`.
 // Las respuestas compartidas se guardan sin IP, cookies ni identificador: solo el día y las respuestas.
-import { resultados, validar, type Fila } from "./respuestas";
+import { enVeda, maxAge, resultados, validar, type Fila } from "./respuestas";
 
 interface D1Result<T> { results: T[] }
 interface D1Stmt { bind(...v: unknown[]): D1Stmt; run(): Promise<unknown>; all<T>(): Promise<D1Result<T>>; first<T>(): Promise<T | null> }
@@ -37,6 +37,9 @@ export default {
     }
 
     if (pathname === "/api/resultados") {
+      const ahora = Date.now();
+      const cache = `public, max-age=${maxAge(ahora)}`;
+      if (enVeda(ahora)) return json(resultados(0, [], ahora), 200, cache);
       const d = await db(env);
       const total = (await d.prepare("SELECT COUNT(*) AS n FROM envios").first<{ n: number }>())?.n ?? 0;
       const { results } = await d
@@ -49,7 +52,7 @@ export default {
            FROM envios, json_each(envios.respuestas) AS j GROUP BY j.key`,
         )
         .all<Fila>();
-      return json(resultados(total, results, Date.now()), 200, "public, max-age=300");
+      return json(resultados(total, results, ahora), 200, cache);
     }
 
     if (pathname.startsWith("/api/")) return json({ error: "No encontrado" }, 404);

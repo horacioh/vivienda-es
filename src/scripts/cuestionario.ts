@@ -188,8 +188,14 @@ function yaCompartido() {
   }
 }
 
-function prepararCompartir(contestadas: number) {
-  $("compartir").hidden = contestadas === 0;
+let hayApi = false;
+let enviando = false;
+let contestadasAhora = 0;
+
+function prepararCompartir(contestadas = contestadasAhora) {
+  contestadasAhora = contestadas;
+  $("compartir").hidden = contestadas === 0 || !hayApi;
+  if (enviando) return;
   const ya = yaCompartido();
   btnCompartir.hidden = ya;
   btnCompartir.disabled = false;
@@ -197,6 +203,8 @@ function prepararCompartir(contestadas: number) {
 }
 
 btnCompartir.addEventListener("click", async () => {
+  if (enviando) return;
+  enviando = true;
   const envio: Record<string, [number, number]> = {};
   datos.afirmaciones.forEach((a, i) => {
     const u = respuestas[i];
@@ -214,10 +222,12 @@ btnCompartir.addEventListener("click", async () => {
     if (res.status === 429) error = "Has enviado varias veces seguidas. Prueba dentro de un minuto.";
     if (!res.ok) throw new Error(error);
   } catch {
+    enviando = false;
     btnCompartir.disabled = false;
     estadoCompartir.textContent = error;
     return;
   }
+  enviando = false;
   try {
     localStorage.setItem(COMPARTIDO, new Date().toISOString().slice(0, 10));
   } catch {}
@@ -248,6 +258,8 @@ async function cargarOpiniones(recargar = false) {
   } catch {
     return;
   }
+  hayApi = true;
+  prepararCompartir();
   $("opiniones").hidden = false;
   const estado = $("op-estado"), lista = $("op-lista");
   lista.replaceChildren();
