@@ -61,8 +61,8 @@ export async function verificarTurnstile(
 
 /** Seconds a /api/resultados response may be cached: never past the start of the blackout. */
 export function maxAge(ahora: number, normal = 300) {
-  const hastaVeda = Math.floor((VEDA.desde - ahora) / 1000);
-  return hastaVeda > 0 ? Math.min(normal, hastaVeda) : normal;
+  if (ahora >= VEDA.desde) return normal;
+  return Math.min(normal, Math.floor((VEDA.desde - ahora) / 1000));
 }
 
 export interface Fila { id: string; favor: number; neutral: number; contra: number; importa: number }

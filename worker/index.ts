@@ -49,7 +49,8 @@ export default {
 
     if (pathname === "/api/resultados") {
       const ahora = Date.now();
-      const cache = `public, max-age=${maxAge(ahora)}`;
+      const segundos = maxAge(ahora);
+      const cache = segundos > 0 ? `public, max-age=${segundos}` : "no-store";
       if (enVeda(ahora)) return json({ ...resultados(0, [], ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
       const d = await db(env);
       const total = (await d.prepare("SELECT COUNT(*) AS n FROM envios").first<{ n: number }>())?.n ?? 0;
