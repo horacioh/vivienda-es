@@ -81,6 +81,22 @@ describe("validarNovedades", () => {
     expect(errores.join()).toContain("duplicada");
   });
 
+  test("falla si el cuerpo contiene HTML o enlaces que no son https/mailto/rutas", () => {
+    const cuerpo = (texto: string) => validarNovedades([{ nombre: "2026-10-07-x.md", contenido: `${md(base)}\n${texto}\n` }]).join("\n");
+    for (const html of ["<script>alert(1)</script>", "Texto <img src=x onerror=alert(1)>", "<!-- x -->", "</p>", "<javascript:alert(1)>"])
+      expect(cuerpo(html)).toContain("HTML");
+    for (const url of [
+      "[a](javascript:alert(1))",
+      "[a]( JavaScript:alert(1))",
+      "[a](java&#x73;cript:alert(1))",
+      "[a](<javascript:alert(1)>)",
+      "![i](data:image/svg+xml,x)",
+      "[r][x]\n\n[x]: vbscript:msgbox(1)",
+    ])
+      expect(cuerpo(url)).toContain("enlace no permitido");
+    expect(cuerpo("Ver el [BOE](https://www.boe.es/x), <https://boe.es>, [inicio](/), [arriba](#a) y [correo](mailto:a@b.es). 3 < 4.")).toBe("");
+  });
+
   test("detecta duplicados por título y fecha", () => {
     const otra = { ...base, fuente_url: "https://www.congreso.es/es/notas-de-prensa" };
     const errores = validarNovedades([

@@ -1,5 +1,7 @@
+import { satteri } from "@astrojs/markdown-satteri";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
+import { sanearMarkdown } from "./src/lib/markdown-seguro";
 
 // SITE_URL/BASE_PATH permiten publicar el mismo build en GitHub Pages
 // (https://horacioh.github.io/vivienda-es) sin tocar el código.
@@ -14,6 +16,11 @@ export default defineConfig({
   build: {
     format: "file",
     inlineStylesheets: "always",
+  },
+  // El cuerpo de las novedades lo escribe un agente a partir de webs externas:
+  // nunca se publica HTML crudo ni enlaces `javascript:`/`data:`.
+  markdown: {
+    processor: satteri({ hastPlugins: [sanearMarkdown] }),
   },
   i18n: {
     locales: ["es"],
