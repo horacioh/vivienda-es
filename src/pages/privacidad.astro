@@ -1,0 +1,81 @@
+---
+import Base from "../layouts/Base.astro";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const ext = { target: "_blank", rel: "noopener" };
+---
+<Base title="Política de privacidad" description="Qué datos trata Vivienda ES, para qué y durante cuánto tiempo. Sin cookies de análisis ni de publicidad.">
+  <div class="mx-auto max-w-2xl pt-8 sm:pt-14">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-accent">Legal</p>
+    <h1 class="mt-3 font-display text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl">Política de privacidad</h1>
+    <p class="mt-4 text-lg leading-relaxed text-ink-2 text-pretty">
+      <b class="text-ink">En resumen:</b> puedes leer y usar todo el sitio sin dar ningún dato. El cuestionario se calcula en tu navegador. Solo se guarda algo si pulsas «Compartir de forma anónima», y lo que se guarda son tus respuestas y el día, sin nada que te identifique.
+    </p>
+    <div class="prose-novedad prose-legal mt-4">
+      <h2>1. Responsable</h2>
+      <p>Horacio Herrera, España. Email: <a href="mailto:horacio@seedhypermedia.com">horacio@seedhypermedia.com</a>. No hay delegado de protección de datos porque no es obligatorio.</p>
+
+      <h2>2. Qué datos se tratan, para qué y con qué base</h2>
+      <h3>a) Al visitar la web</h3>
+      <p>La web está alojada en Cloudflare. Para servir las páginas y protegerlas de ataques, Cloudflare trata técnicamente tu dirección IP, el navegador (user-agent) y la página que pides, como ocurre con cualquier web. Vivienda ES no usa analítica, no guarda registros de visitas y no tiene acceso a esos datos.</p>
+      <ul><li><i>Base jurídica:</i> interés legítimo en ofrecer la web y mantenerla segura (art. 6.1.f RGPD).</li></ul>
+
+      <h3>b) Al hacer el cuestionario</h3>
+      <p>Tus respuestas y tu resultado se calculan <b>solo en tu navegador</b>. No se envían a ningún sitio.</p>
+
+      <h3>c) Si pulsas «Compartir de forma anónima»</h3>
+      <ul>
+        <li><i>Qué se envía:</i> tus respuestas a las afirmaciones que hayas contestado (de acuerdo / neutral / en desacuerdo y si te importa mucho).</li>
+        <li><i>Qué se guarda:</i> solo esas respuestas y la fecha (el día, sin hora). <b>No</b> se guardan tu IP, cookies, el navegador ni ningún identificador. Una vez guardadas, nadie, tampoco el titular, puede saber qué respuestas son tuyas.</li>
+        <li><i>Uso momentáneo de tu IP:</i> en el instante del envío, tu IP se usa para limitar los envíos repetidos (máximo 5 por minuto) y se descarta; no se escribe en ningún sitio ni se envía a Turnstile.</li>
+        <li><i>Comprobación antirrobots:</i> antes del envío, Cloudflare Turnstile comprueba que eres una persona. Para ello trata señales técnicas de tu navegador: IP, huella TLS, user-agent y la web desde la que se usa. Turnstile <b>no recibe tus respuestas</b>.</li>
+        <li><i>Finalidad:</i> mostrar de forma agregada <a href={`${base}/elecciones#opiniones`}>«Qué responde la gente»</a>, solo a partir de 30 cuestionarios y nunca durante la veda electoral.</li>
+        <li><i>Base jurídica:</i> tus respuestas revelan opiniones sobre política de vivienda. Por eso, al pulsar el botón, das tu <b>consentimiento explícito</b> para que se envíen y se guarden sin identificarte (arts. 6.1.a y 9.2.a RGPD). La limitación de envíos y la comprobación antirrobots se basan además en el interés legítimo en evitar abusos (art. 6.1.f RGPD).</li>
+        <li><i>Ten en cuenta:</i> como no guardamos nada que te identifique, <b>después no podremos localizar ni borrar tu envío</b> (art. 11 RGPD). Comparte solo si estás de acuerdo. Si tienes menos de 14 años, no compartas tus respuestas.</li>
+      </ul>
+
+      <h3>d) Si nos escribes</h3>
+      <p>Usaremos tu email y lo que nos cuentes solo para responderte o corregir un error, y lo borraremos cuando ya no haga falta.</p>
+      <ul><li><i>Base jurídica:</i> interés legítimo en atender tu mensaje (art. 6.1.f RGPD).</li></ul>
+
+      <h3>e) Diputados y partidos</h3>
+      <p>La web muestra el nombre y el voto de algunos diputados y diputadas en votaciones del Pleno del Congreso. Son datos públicos de cargos públicos en ejercicio, tomados de los datos abiertos del Congreso (arts. 6.1.f y 9.2.e RGPD). Si eres una de esas personas y quieres señalar un error, escribe a <a href="mailto:horacio@seedhypermedia.com">horacio@seedhypermedia.com</a>.</p>
+
+      <h2>3. Quién más trata los datos</h2>
+      <ul>
+        <li><b>Cloudflare, Inc.</b> (alojamiento, base de datos, limitación de envíos y Turnstile) actúa como <b>encargado del tratamiento</b>, con un contrato de encargo (<a href="https://www.cloudflare.com/cloudflare-customer-dpa/" {...ext}>DPA</a>).</li>
+        <li>Para mejorar su sistema antirrobots, Cloudflare trata las señales de Turnstile como <b>responsable</b> por su cuenta, según su <a href="https://www.cloudflare.com/turnstile-privacy-policy/" {...ext}>anexo de privacidad de Turnstile</a> y su <a href="https://www.cloudflare.com/privacypolicy/" {...ext}>política de privacidad</a>.</li>
+        <li>No se ceden datos a nadie más ni se venden.</li>
+      </ul>
+
+      <h2>4. Transferencias internacionales</h2>
+      <p>Cloudflare, Inc. tiene su sede en EE. UU. y puede tratar datos técnicos (como la IP) fuera del Espacio Económico Europeo. Las garantías son el Marco de Privacidad de Datos UE-EE. UU. (<a href="https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:32023D1795" {...ext}>Decisión de adecuación (UE) 2023/1795</a>; consulta la <a href="https://www.dataprivacyframework.gov/list" {...ext}>lista de entidades certificadas</a>) y las cláusulas contractuales tipo de la Comisión Europea incluidas en su DPA.</p>
+
+      <h2>5. Conservación</h2>
+      <ul>
+        <li>IP en la limitación de envíos: solo durante la petición.</li>
+        <li>Respuestas compartidas (anónimas): hasta el 31 de diciembre de 2026. A partir del 1 de enero de 2027 no se aceptan más envíos y una tarea automática borra todas las respuestas guardadas.</li>
+        <li>Emails: el tiempo necesario para atenderlos y, como máximo, 12 meses.</li>
+      </ul>
+
+      <h2>6. Tus derechos</h2>
+      <p>Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad, y retirar tu consentimiento, escribiendo a <a href="mailto:horacio@seedhypermedia.com">horacio@seedhypermedia.com</a>.</p>
+      <ul>
+        <li>Las respuestas compartidas son anónimas, así que no podemos identificarlas como tuyas ni, por tanto, darte acceso a ellas ni borrarlas.</li>
+        <li>Retirar el consentimiento no afecta a lo ya enviado.</li>
+      </ul>
+      <p>Si crees que no hemos tratado bien tus datos, puedes reclamar ante la <a href="https://www.aepd.es" {...ext}>Agencia Española de Protección de Datos</a>.</p>
+
+      <h2 id="cookies">7. Cookies y almacenamiento en tu navegador</h2>
+      <ul>
+        <li><b>Vivienda ES no usa cookies propias</b> ni herramientas de analítica o publicidad.</li>
+        <li><b>Almacenamiento local (<code>localStorage</code>).</b> Si compartes tus respuestas, tu navegador guarda la marca <code>vivienda-es:compartido</code> con la fecha del envío. Sirve solo para no volver a mostrarte el botón y evitar envíos duplicados. No se envía a ningún servidor. Puedes borrarla desde la configuración de tu navegador (datos de sitios).</li>
+        <li><b>Cloudflare Turnstile.</b> Solo se carga cuando pulsas «Compartir». Para comprobar que no eres un robot, puede usar cookies o almacenamiento técnico propio en el dominio <code>challenges.cloudflare.com</code>, por ejemplo <code>cf_clearance</code> o <code>cf_chl_*</code> (<a href="https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/" {...ext}>detalle</a>).</li>
+        <li>Todo lo anterior es necesario para el servicio que pides, o tiene fines de seguridad, así que no requiere tu consentimiento (art. 22.2 LSSI; <a href="https://www.aepd.es/guias/guia-cookies.pdf" {...ext}>Guía de cookies de la AEPD</a>).</li>
+      </ul>
+
+      <h2>8. Cambios</h2>
+      <p>Si esta política cambia, se publicará aquí con su fecha. El historial completo está en <a href="https://github.com/horacioh/vivienda-es/commits/main/src/pages/privacidad.astro" {...ext}>GitHub</a>.</p>
+      <p class="text-sm text-muted">Última actualización: 12 de octubre de 2026.</p>
+    </div>
+  </div>
+</Base>

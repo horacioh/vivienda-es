@@ -8,8 +8,8 @@ público: escribe a **hi@horacioh.com** con los pasos para reproducirlo. Respond
 
 - Solo si el usuario pulsa «Compartir de forma anónima»: el día y las respuestas del cuestionario, en
   la tabla `envios` de Cloudflare D1. Sin IP, cookies, user-agent ni identificadores.
-- La IP se usa en memoria para el rate limit y se envía a Cloudflare Turnstile para la comprobación
-  antirrobots; no se guarda.
+- La IP se usa en memoria para el rate limit; no se guarda ni se envía a Cloudflare Turnstile.
+- Las respuestas se borran el 1 de enero de 2027 (ver la [política de privacidad](https://vivienda-es.hhg.app/privacidad)).
 
 ## Secretos
 

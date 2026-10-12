@@ -1,0 +1,30 @@
+---
+import Base from "../layouts/Base.astro";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const ext = { target: "_blank", rel: "noopener" };
+---
+<Base title="Aviso legal" description="Quién está detrás de Vivienda ES, de dónde salen los datos y cómo pedir una corrección.">
+  <div class="mx-auto max-w-2xl pt-8 sm:pt-14">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.16em] text-accent">Legal</p>
+    <h1 class="mt-3 font-display text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-5xl">Aviso legal</h1>
+    <div class="prose-novedad prose-legal mt-6">
+      <p><b>Titular.</b> Vivienda ES (https://vivienda-es.hhg.app) es un proyecto personal y sin ánimo de lucro de Horacio Herrera, residente en España. Contacto: <a href="mailto:horacio@seedhypermedia.com">horacio@seedhypermedia.com</a>.</p>
+      <p><b>Carácter del sitio.</b> Es una web informativa e independiente. No tiene publicidad, no vende nada, no pide registrarse y no recibe financiación de partidos, administraciones ni empresas. <b>No es una publicación oficial</b> y no está vinculada al Boletín Oficial del Estado, al Congreso de los Diputados, al Senado, a ningún ministerio ni a ningún partido político.</p>
+      <p><b>Contenido y fuentes.</b> Cada novedad resume, con palabras propias, un documento de una fuente oficial y enlaza a él. El resumen es orientativo: el texto que tiene valor es siempre el de la fuente oficial. A pesar del cuidado puesto, puede haber errores u omisiones, y el titular no responde de las decisiones que se tomen basándose solo en estos resúmenes.</p>
+      <p><b>Cuestionario «Elecciones 29N».</b> Compara tus respuestas con lo que votó cada grupo en el Pleno del Congreso, según los datos abiertos del Congreso. Mide coincidencia con votos pasados, no con los programas electorales, y <b>no es una recomendación de voto</b>. La sección «Qué responde la gente» muestra respuestas compartidas de forma voluntaria y <b>no es una encuesta ni un sondeo</b>: no representa a la población.</p>
+      <h2>Reutilización de información pública</h2>
+      <ul>
+        <li>Basado en datos de la <a href="https://www.boe.es" {...ext}>Agencia Estatal Boletín Oficial del Estado</a>, conforme a sus <a href="https://www.boe.es/informacion/aviso_legal/index.php" {...ext}>condiciones de reutilización</a>.</li>
+        <li>Fuente de las votaciones: Congreso de los Diputados, <a href="https://www.congreso.es/datos-abiertos" {...ext}>datos abiertos</a>, conforme a su <a href="https://www.congreso.es/cem/aviso-legal" {...ext}>aviso legal</a>. Cada votación indica su fecha. Datos consultados por última vez el 12 de octubre de 2026.</li>
+        <li>Otras fuentes: Senado, Ministerio de Vivienda y Agenda Urbana, La Moncloa y las webs oficiales de los partidos, siempre con enlace al original.</li>
+        <li>Ninguno de estos organismos participa en esta web ni la patrocina o respalda.</li>
+      </ul>
+      <p><b>Propiedad intelectual.</b> Los textos propios, los datos elaborados y el <a href="https://github.com/horacioh/vivienda-es" {...ext}>código fuente</a> son de Horacio Herrera y se publican bajo la <a href="https://github.com/horacioh/vivienda-es/blob/main/LICENSE" {...ext}>licencia Apache 2.0</a>. Las leyes, disposiciones y actos de organismos públicos no están sujetos a propiedad intelectual (art. 13 TRLPI). Las marcas y nombres de partidos pertenecen a sus titulares y se mencionan solo para identificarlos.</p>
+      <p><b>Correcciones.</b> Si crees que algo es inexacto, en especial la postura atribuida a un partido, escribe a <a href="mailto:horacio@seedhypermedia.com">horacio@seedhypermedia.com</a> indicando la novedad o afirmación y la fuente que lo acredita. Revisaremos la petición y, si procede, la corregiremos lo antes posible (como objetivo, en tres días). Puedes ver el historial de cambios en <a href="https://github.com/horacioh/vivienda-es/commits/main" {...ext}>GitHub</a>.</p>
+      <p><b>Enlaces externos.</b> Esta web enlaza a sitios de terceros sobre los que no tiene control y de cuyo contenido no responde.</p>
+      <p><b>Privacidad.</b> Consulta la <a href={`${base}/privacidad`}>política de privacidad</a>.</p>
+      <p><b>Ley aplicable.</b> Legislación española.</p>
+      <p class="text-sm text-muted">Última actualización: 12 de octubre de 2026.</p>
+    </div>
+  </div>
+</Base>
