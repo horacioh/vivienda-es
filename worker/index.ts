@@ -1,6 +1,6 @@
 // Worker delante de los static assets: solo atiende /api/*; el resto lo sirve `dist/`.
 // Las respuestas compartidas se guardan sin IP, cookies ni identificador: solo el día y las respuestas.
-import { claveLimite, corte, enVeda, hostnames, maxAge, resultados, validar, verificarTurnstile, type Fila } from "./respuestas";
+import { cerrado, claveLimite, corte, enVeda, hostnames, maxAge, resultados, validar, verificarTurnstile, type Fila } from "./respuestas";
 
 interface D1Result<T> { results: T[] }
 interface D1Stmt { bind(...v: unknown[]): D1Stmt; run(): Promise<unknown>; all<T>(): Promise<D1Result<T>>; first<T>(): Promise<T | null> }
@@ -29,7 +29,8 @@ export default {
 
     if (pathname === "/api/respuestas") {
       if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
-      // La IP (o su /64 en IPv6) solo se usa en memoria para limitar envíos repetidos; no se guarda.
+      if (cerrado(Date.now())) return json({ error: "Ya no se aceptan respuestas" }, 410);
+      // La IP (o su /64 en IPv6) solo se usa en memoria para limitar envíos repetidos; no se guarda ni se envía a Turnstile.
       const { success } = await env.LIMITE.limit({ key: claveLimite(req.headers.get("cf-connecting-ip")) });
       if (!success) return json({ error: "Demasiados envíos" }, 429);
       const body = await req.json().catch(() => null);
@@ -38,10 +39,10 @@ export default {
       const humano = await verificarTurnstile((body as { token?: unknown }).token, {
         secret: env.TURNSTILE_SECRET,
         hostnames: hostnames(env.TURNSTILE_HOSTNAMES),
-        ip: req.headers.get("cf-connecting-ip"),
       });
       if (!humano)
         return json({ error: "No se ha podido comprobar que no eres un robot" }, 403);
+      if (cerrado(Date.now())) return json({ error: "Ya no se aceptan respuestas" }, 410);
       const fecha = new Date().toISOString().slice(0, 10);
       await (await db(env)).prepare("INSERT INTO envios (fecha, respuestas) VALUES (?, ?)").bind(fecha, JSON.stringify(envio)).run();
       return json({ ok: true }, 201);
@@ -50,7 +51,7 @@ export default {
     if (pathname === "/api/resultados") {
       const ahora = Date.now();
       const cache = `public, max-age=${maxAge(ahora)}`;
-      if (enVeda(ahora)) return json({ ...resultados(0, [], ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
+      if (enVeda(ahora) || cerrado(ahora)) return json({ ...resultados(0, [], ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
       const d = await db(env);
       const hasta = corte(ahora);
       const total = (await d.prepare("SELECT COUNT(*) AS n FROM envios WHERE fecha < ?").bind(hasta).first<{ n: number }>())?.n ?? 0;
@@ -70,5 +71,10 @@ export default {
 
     if (pathname.startsWith("/api/")) return json({ error: "No encontrado" }, 404);
     return env.ASSETS.fetch(req);
+  },
+
+  // Tarea diaria (`triggers.crons` en wrangler.jsonc): llegada la fecha de borrado, elimina todas las respuestas.
+  async scheduled(_c: unknown, env: Env): Promise<void> {
+    if (cerrado(Date.now())) await (await db(env)).exec("DELETE FROM envios");
   },
 };

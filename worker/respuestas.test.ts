@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MINIMO, VEDA, claveLimite, corte, enVeda, maxAge, redondear, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
+import { BORRADO, MINIMO, VEDA, cerrado, claveLimite, corte, enVeda, maxAge, redondear, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -95,12 +95,26 @@ describe("claveLimite", () => {
   });
 });
 
+describe("borrado", () => {
+  test("acepta envíos hasta el 31 de diciembre de 2026", () => {
+    expect(cerrado(Date.parse("2026-12-31T22:59:59Z"))).toBe(false);
+    expect(cerrado(Date.parse("2026-12-31T23:00:00Z"))).toBe(true);
+  });
+  test("después del borrado no hay cifras", () => {
+    expect(resultados(500, [], BORRADO)).toEqual({ veda: false, cerrado: true, minimo: MINIMO });
+  });
+  test("no se cachea más allá del borrado", () => {
+    expect(maxAge(BORRADO - 30_000)).toBe(30);
+    expect(maxAge(BORRADO - 500)).toBe(0);
+  });
+});
+
 describe("maxAge", () => {
   test("5 minutos lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(300));
   test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 60_000)).toBe(60));
   test("no se cachea más allá de la medianoche UTC (cambia la foto diaria)", () => {
     expect(maxAge(Date.parse("2026-10-12T23:59:00Z"))).toBe(60);
-    expect(maxAge(Date.parse("2026-10-12T23:59:59.500Z"))).toBe(1);
+    expect(maxAge(Date.parse("2026-10-12T23:59:59.500Z"))).toBe(0);
   });
   test("durante y después de la veda, 5 minutos", () => {
     expect(maxAge(VEDA.desde + 1)).toBe(300);
@@ -130,10 +144,10 @@ describe("verificarTurnstile", () => {
     expect(await verificarTurnstile("", o, nunca)).toBe(false);
     expect(await verificarTurnstile("x".repeat(2049), o, nunca)).toBe(false);
   });
-  test("envía remoteip si hay IP", async () => {
+  test("no envía la IP a Cloudflare", async () => {
     let enviado = "";
     const espia = (async (_u: string, i: RequestInit) => ((enviado = String(i.body)), new Response(JSON.stringify(bueno)))) as unknown as typeof fetch;
-    await verificarTurnstile("t", { ...o, ip: "203.0.113.1" }, espia);
-    expect(enviado).toContain("remoteip=203.0.113.1");
+    await verificarTurnstile("t", o, espia);
+    expect(enviado).not.toContain("remoteip");
   });
 });

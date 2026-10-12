@@ -24,6 +24,10 @@ export function validar(body: unknown): Envio | null {
 export const VEDA = { desde: Date.parse("2026-11-24T00:00:00+01:00"), hasta: Date.parse("2026-11-29T21:00:00+01:00") };
 export const enVeda = (t: number) => t >= VEDA.desde && t < VEDA.hasta;
 
+/** Desde esta fecha no se aceptan envíos y la tarea diaria borra todos los guardados (ver /privacidad). */
+export const BORRADO = Date.parse("2027-01-01T00:00:00+01:00");
+export const cerrado = (t: number) => t >= BORRADO;
+
 /** Por debajo de este número de envíos (en total y por afirmación) no se publican porcentajes. */
 export const MINIMO = 30;
 
@@ -37,14 +41,13 @@ export const hostnames = (v: string | undefined) =>
 /** Canonical siteverify: success, the expected action and an approved frontend hostname. */
 export async function verificarTurnstile(
   token: unknown,
-  o: { secret?: string; hostnames: Set<string>; ip?: string | null },
+  o: { secret?: string; hostnames: Set<string> },
   f: typeof fetch = fetch,
 ) {
   if (!o.secret || typeof token !== "string" || !token || token.length > 2048 || o.hostnames.size === 0) return false;
   let r: { success?: boolean; action?: string; hostname?: string };
   try {
     const body = new URLSearchParams({ secret: o.secret, response: token });
-    if (o.ip) body.set("remoteip", o.ip);
     const res = await f(SITEVERIFY, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -60,13 +63,13 @@ export async function verificarTurnstile(
 }
 
 /**
- * Seconds a /api/resultados response may be cached: never past the start of the blackout
- * nor past the next UTC midnight, when the daily snapshot changes.
+ * Seconds a /api/resultados response may be cached: never past the start of the blackout, the
+ * deletion date or the next UTC midnight (when the daily snapshot changes).
  */
 export function maxAge(ahora: number, normal = 300) {
-  const hastaVeda = Math.floor((VEDA.desde - ahora) / 1000);
-  const hastaManana = Math.ceil((Math.floor(ahora / 86_400_000 + 1) * 86_400_000 - ahora) / 1000);
-  return Math.min(normal, hastaManana, hastaVeda > 0 ? hastaVeda : normal);
+  const manana = (Math.floor(ahora / 86_400_000) + 1) * 86_400_000;
+  const limites = [VEDA.desde, BORRADO, manana].filter((t) => t > ahora).map((t) => Math.floor((t - ahora) / 1000));
+  return Math.min(normal, ...limites);
 }
 
 /**
@@ -117,6 +120,7 @@ export function redondear(n: number[]): number[] {
 }
 
 export function resultados(total: number, filas: Fila[], ahora: number) {
+  if (cerrado(ahora)) return { veda: false as const, cerrado: true as const, minimo: MINIMO };
   if (enVeda(ahora)) return { veda: true as const, minimo: MINIMO };
   if (total < MINIMO) return { veda: false as const, minimo: MINIMO };
   const afirmaciones: Record<string, Porcentajes> = {};

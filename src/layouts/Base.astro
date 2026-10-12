@@ -60,11 +60,14 @@ const documentTitle = title === "Vivienda ES" ? title : `${title} · Vivienda ES
           <p class="mt-2 max-w-md leading-relaxed text-muted text-pretty">
             Novedades sobre vivienda en España, actualizadas a diario. Cada dato enlaza a su fuente oficial: BOE, Congreso, Senado, Ministerio de Vivienda y webs oficiales de los partidos.
           </p>
+          <p class="mt-2 max-w-md leading-relaxed text-muted text-pretty">Basado en datos de la Agencia Estatal BOE y de los datos abiertos del Congreso. Sin cookies de análisis ni de publicidad.</p>
         </div>
-        <ul class="flex gap-5 text-muted sm:flex-col sm:gap-2">
+        <ul class="flex flex-wrap gap-x-5 gap-y-2 whitespace-nowrap text-muted sm:flex-col sm:flex-nowrap">
           <li><a class="transition-colors hover:text-ink" href={`${base}/acerca`}>Fuentes y método</a></li>
           <li><a class="transition-colors hover:text-ink" href={`${base}/rss.xml`}>RSS</a></li>
           <li><a class="transition-colors hover:text-ink" href="https://github.com/horacioh/vivienda-es">GitHub</a></li>
+          <li><a class="transition-colors hover:text-ink" href={`${base}/aviso-legal`}>Aviso legal</a></li>
+          <li><a class="transition-colors hover:text-ink" href={`${base}/privacidad`}>Privacidad</a></li>
         </ul>
       </div>
     </footer>
