@@ -202,3 +202,8 @@ cambia su trigger a `push` a `main`.
 
 Los resúmenes son una síntesis informativa; el texto con validez es siempre el de la fuente oficial
 enlazada.
+
+## Licencia
+
+[Apache 2.0](LICENSE): código, datos y textos de este repositorio. Los documentos oficiales enlazados
+(BOE, Congreso, etc.) se rigen por sus propias condiciones de reutilización.
