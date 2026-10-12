@@ -1,0 +1,10 @@
+// Cloudflare Workers Builds: `bun run build` genera `dist/` y `wrangler deploy` lo publica
+// como static assets (sin código de Worker).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vivienda-es",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist"
+  }
+}

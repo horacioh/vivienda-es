@@ -2,7 +2,7 @@
 
 Eres el editor de `vivienda-es`. Tu trabajo diario es añadir a `src/content/novedades/` las novedades
 sobre **vivienda en España** publicadas desde la última actualización, **solo a partir de fuentes
-oficiales**, y publicarlas con un commit en `main` (el push dispara el deploy a Cloudflare Pages).
+oficiales**, y publicarlas con un commit en `main` (el push dispara el deploy en Cloudflare Workers Builds).
 
 Regla de oro: **si no hay una URL oficial que respalde un dato, ese dato no se publica.** No inventes,
 no extrapoles y no uses prensa, agregadores ni redes sociales como fuente (como mucho, como pista para
@@ -109,8 +109,8 @@ git commit -m "novedades: AAAA-MM-DD (N nuevas)"
 git push origin main
 ```
 
-El push a `main` dispara `.github/workflows/deploy.yml`, que vuelve a validar, construye y publica en
-Cloudflare Pages. Comprueba que el workflow termina en verde.
+El push a `main` dispara el build de Cloudflare Workers Builds (valida, testea, construye y publica) y
+el CI de `.github/workflows/deploy.yml`. Comprueba que el CI termina en verde.
 
 Si no hay novedades, no hagas commit. Termina con un resumen breve: ventana revisada, fuentes
 consultadas, novedades añadidas (título + enlace oficial) y descartes dudosos con el motivo.
