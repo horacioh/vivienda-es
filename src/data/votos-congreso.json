@@ -1,0 +1,583 @@
+{
+  "/webpublica/opendata/votaciones/Leg15/Sesion175/20260428/Votacion003/VOT_20260428200330.json": {
+    "sesion": 175,
+    "numero": 3,
+    "fecha": "28/4/2026",
+    "totales": {
+      "si": 166,
+      "no": 177,
+      "abstencion": 5,
+      "no_votan": 2
+    },
+    "grupos": {
+      "GP": {
+        "No": 137
+      },
+      "GVOX": {
+        "No": 33
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 7
+      },
+      "GJxCAT": {
+        "No": 6,
+        "No vota": 1
+      },
+      "GSUMAR": {
+        "Sí": 25,
+        "No vota": 1
+      },
+      "GS": {
+        "Sí": 121
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GEH Bildu": {
+        "Sí": 6
+      },
+      "GV (EAJ-PNV)": {
+        "Abstención": 5
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Sánchez Serna, Javier": "Sí",
+      "Santana Perera, Noemí": "Sí",
+      "Valido García, Cristina": "Sí"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion059/20240917/Votacion001/VOT_20240917204416.json": {
+    "sesion": 59,
+    "numero": 1,
+    "fecha": "17/9/2024",
+    "totales": {
+      "si": 172,
+      "no": 178,
+      "abstencion": 0,
+      "no_votan": 0
+    },
+    "grupos": {
+      "GP": {
+        "No": 137
+      },
+      "GVOX": {
+        "No": 33
+      },
+      "GJxCAT": {
+        "No": 7
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 7
+      },
+      "GS": {
+        "Sí": 120
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GSUMAR": {
+        "Sí": 27
+      },
+      "GEH Bildu": {
+        "Sí": 6
+      },
+      "GV (EAJ-PNV)": {
+        "Sí": 5
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Santana Perera, Noemí": "Sí",
+      "Valido García, Cristina": "Sí",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Sánchez Serna, Javier": "Sí"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion086/20241217/Votacion001/VOT_20241217205720.json": {
+    "sesion": 86,
+    "numero": 1,
+    "fecha": "17/12/2024",
+    "totales": {
+      "si": 176,
+      "no": 169,
+      "abstencion": 0,
+      "no_votan": 5
+    },
+    "grupos": {
+      "GP": {
+        "No": 135,
+        "No vota": 2
+      },
+      "GVOX": {
+        "No": 33
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 7
+      },
+      "GEH Bildu": {
+        "Sí": 6
+      },
+      "GV (EAJ-PNV)": {
+        "Sí": 5
+      },
+      "GSUMAR": {
+        "Sí": 27
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GS": {
+        "Sí": 117,
+        "No vota": 3
+      },
+      "GJxCAT": {
+        "Sí": 7
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Sánchez Serna, Javier": "Sí",
+      "Santana Perera, Noemí": "Sí",
+      "Valido García, Cristina": "Sí"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion135/20251007/Votacion002/VOT_20251007214330.json": {
+    "sesion": 135,
+    "numero": 2,
+    "fecha": "7/10/2025",
+    "totales": {
+      "si": 176,
+      "no": 169,
+      "abstencion": 0,
+      "no_votan": 5
+    },
+    "grupos": {
+      "GP": {
+        "No": 135,
+        "No vota": 2
+      },
+      "GVOX": {
+        "No": 33
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 8
+      },
+      "GV (EAJ-PNV)": {
+        "Sí": 5
+      },
+      "GSUMAR": {
+        "Sí": 26
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GS": {
+        "Sí": 117,
+        "No vota": 3
+      },
+      "GJxCAT": {
+        "Sí": 7
+      },
+      "GEH Bildu": {
+        "Sí": 6
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Sánchez Serna, Javier": "Sí",
+      "Santana Perera, Noemí": "Sí",
+      "Valido García, Cristina": "Sí"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion118/20250612/Votacion012/VOT_20250612132253.json": {
+    "sesion": 118,
+    "numero": 12,
+    "fecha": "12/6/2025",
+    "totales": {
+      "si": 43,
+      "no": 298,
+      "abstencion": 6,
+      "no_votan": 3
+    },
+    "grupos": {
+      "GP": {
+        "No": 136,
+        "No vota": 1
+      },
+      "GVOX": {
+        "No": 33
+      },
+      "GS": {
+        "No": 119,
+        "No vota": 1
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 5,
+        "Abstención": 1,
+        "No vota": 1
+      },
+      "GJxCAT": {
+        "No": 7
+      },
+      "GEH Bildu": {
+        "No": 1,
+        "Sí": 5
+      },
+      "GSUMAR": {
+        "No": 1,
+        "Sí": 26
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GV (EAJ-PNV)": {
+        "Abstención": 5
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Santana Perera, Noemí": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Sánchez Serna, Javier": "Sí",
+      "Valido García, Cristina": "Abstención"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion180/20260520/Votacion005/VOT_20260520142326.json": {
+    "sesion": 180,
+    "numero": 5,
+    "fecha": "20/5/2026",
+    "totales": {
+      "si": 169,
+      "no": 170,
+      "abstencion": 8,
+      "no_votan": 3
+    },
+    "grupos": {
+      "GP": {
+        "No": 137
+      },
+      "GVOX": {
+        "No": 32,
+        "No vota": 1
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 6,
+        "Abstención": 1
+      },
+      "GSUMAR": {
+        "Sí": 26
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GS": {
+        "Sí": 119,
+        "No vota": 2
+      },
+      "GEH Bildu": {
+        "Sí": 6
+      },
+      "GV (EAJ-PNV)": {
+        "Sí": 5
+      },
+      "GJxCAT": {
+        "Abstención": 7
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Sánchez Serna, Javier": "Sí",
+      "Santana Perera, Noemí": "Sí",
+      "Valido García, Cristina": "Abstención"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion173/20260421/Votacion001/VOT_20260421201008.json": {
+    "sesion": 173,
+    "numero": 1,
+    "fecha": "21/4/2026",
+    "totales": {
+      "si": 178,
+      "no": 163,
+      "abstencion": 6,
+      "no_votan": 3
+    },
+    "grupos": {
+      "GS": {
+        "No": 119,
+        "No vota": 2
+      },
+      "GSUMAR": {
+        "No": 25,
+        "No vota": 1
+      },
+      "GR": {
+        "No": 7
+      },
+      "GEH Bildu": {
+        "No": 6
+      },
+      "GMx": {
+        "No": 6,
+        "Sí": 1,
+        "Abstención": 1
+      },
+      "GP": {
+        "Sí": 137
+      },
+      "GVOX": {
+        "Sí": 33
+      },
+      "GJxCAT": {
+        "Sí": 7
+      },
+      "GV (EAJ-PNV)": {
+        "Abstención": 5
+      }
+    },
+    "diputados": {
+      "Velarde Gómez, Martina": "No",
+      "Rego Candamil, Néstor": "No",
+      "Belarra Urteaga, Ione": "No",
+      "Sánchez Serna, Javier": "No",
+      "Santana Perera, Noemí": "No",
+      "Catalán Higueras, Alberto": "Sí",
+      "Valido García, Cristina": "Abstención"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion099/20250318/Votacion001/VOT_20250318201321.json": {
+    "sesion": 99,
+    "numero": 1,
+    "fecha": "18/3/2025",
+    "totales": {
+      "si": 300,
+      "no": 44,
+      "abstencion": 0,
+      "no_votan": 6
+    },
+    "grupos": {
+      "GMx": {
+        "No": 5,
+        "Sí": 3
+      },
+      "GEH Bildu": {
+        "No": 6
+      },
+      "GSUMAR": {
+        "No": 26,
+        "No vota": 1
+      },
+      "GR": {
+        "No": 7
+      },
+      "GP": {
+        "Sí": 135,
+        "No vota": 2
+      },
+      "GVOX": {
+        "Sí": 32,
+        "No vota": 1
+      },
+      "GS": {
+        "Sí": 118,
+        "No vota": 2
+      },
+      "GJxCAT": {
+        "Sí": 7
+      },
+      "GV (EAJ-PNV)": {
+        "Sí": 5
+      }
+    },
+    "diputados": {
+      "Santana Perera, Noemí": "No",
+      "Velarde Gómez, Martina": "No",
+      "Rego Candamil, Néstor": "No",
+      "Belarra Urteaga, Ione": "No",
+      "Sánchez Serna, Javier": "No",
+      "Valido García, Cristina": "Sí",
+      "Catalán Higueras, Alberto": "Sí"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion179/20260519/Votacion001/VOT_20260519203502.json": {
+    "sesion": 179,
+    "numero": 1,
+    "fecha": "19/5/2026",
+    "totales": {
+      "si": 171,
+      "no": 164,
+      "abstencion": 11,
+      "no_votan": 4
+    },
+    "grupos": {
+      "GS": {
+        "No": 119,
+        "No vota": 2
+      },
+      "GSUMAR": {
+        "No": 26
+      },
+      "GR": {
+        "No": 7
+      },
+      "GEH Bildu": {
+        "No": 6
+      },
+      "GMx": {
+        "No": 6,
+        "Sí": 2
+      },
+      "GP": {
+        "Sí": 136,
+        "No vota": 1
+      },
+      "GVOX": {
+        "Sí": 33
+      },
+      "GV (EAJ-PNV)": {
+        "Abstención": 5
+      },
+      "GJxCAT": {
+        "Abstención": 6,
+        "No vota": 1
+      }
+    },
+    "diputados": {
+      "Velarde Gómez, Martina": "No",
+      "Rego Candamil, Néstor": "No",
+      "Belarra Urteaga, Ione": "No",
+      "Sánchez Serna, Javier": "No",
+      "Santana Perera, Noemí": "No",
+      "Valido García, Cristina": "Sí",
+      "Catalán Higueras, Alberto": "Sí"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion134/20250924/Votacion002/VOT_20250924171304.json": {
+    "sesion": 134,
+    "numero": 2,
+    "fecha": "24/9/2025",
+    "totales": {
+      "si": 57,
+      "no": 169,
+      "abstencion": 122,
+      "no_votan": 2
+    },
+    "grupos": {
+      "GP": {
+        "No": 136,
+        "Abstención": 1
+      },
+      "GVOX": {
+        "No": 32,
+        "No vota": 1
+      },
+      "GMx": {
+        "No": 1,
+        "Sí": 7,
+        "Abstención": 1
+      },
+      "GV (EAJ-PNV)": {
+        "Sí": 5
+      },
+      "GSUMAR": {
+        "Sí": 25,
+        "No vota": 1
+      },
+      "GR": {
+        "Sí": 7
+      },
+      "GJxCAT": {
+        "Sí": 7
+      },
+      "GEH Bildu": {
+        "Sí": 6
+      },
+      "GS": {
+        "Abstención": 120
+      }
+    },
+    "diputados": {
+      "Catalán Higueras, Alberto": "No",
+      "Velarde Gómez, Martina": "Sí",
+      "Rego Candamil, Néstor": "Sí",
+      "Belarra Urteaga, Ione": "Sí",
+      "Sánchez Serna, Javier": "Sí",
+      "Santana Perera, Noemí": "Sí",
+      "Valido García, Cristina": "Abstención"
+    }
+  },
+  "/webpublica/opendata/votaciones/Leg15/Sesion188/20260618/Votacion012/VOT_20260618162224.json": {
+    "sesion": 188,
+    "numero": 12,
+    "fecha": "18/6/2026",
+    "totales": {
+      "si": 33,
+      "no": 314,
+      "abstencion": 0,
+      "no_votan": 3
+    },
+    "grupos": {
+      "GP": {
+        "No": 137
+      },
+      "GS": {
+        "No": 121
+      },
+      "GMx": {
+        "No": 8
+      },
+      "GR": {
+        "No": 6,
+        "No vota": 1
+      },
+      "GSUMAR": {
+        "No": 25,
+        "No vota": 1
+      },
+      "GJxCAT": {
+        "No": 6,
+        "No vota": 1
+      },
+      "GEH Bildu": {
+        "No": 6
+      },
+      "GV (EAJ-PNV)": {
+        "No": 5
+      },
+      "GVOX": {
+        "Sí": 33
+      }
+    },
+    "diputados": {
+      "Santana Perera, Noemí": "No",
+      "Valido García, Cristina": "No",
+      "Catalán Higueras, Alberto": "No",
+      "Velarde Gómez, Martina": "No",
+      "Rego Candamil, Néstor": "No",
+      "Belarra Urteaga, Ione": "No",
+      "Sánchez Serna, Javier": "No"
+    }
+  }
+}

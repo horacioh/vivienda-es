@@ -65,6 +65,14 @@ Documentado en [`src/content/novedades/README.md`](src/content/novedades/README.
 | `fuente_nombre` | sí | texto |
 | `resultado`, `votos_por_grupo` | no | votaciones |
 
+## Cuestionario «Elecciones 29N»
+
+`/elecciones` compara las respuestas del usuario con lo que votó cada partido en el Pleno del Congreso. Todo se calcula en el navegador; no se guarda nada.
+
+- `src/data/cuestionario.ts`: las afirmaciones, la votación (o votaciones) del Congreso que respalda cada una, qué voto equivale a «de acuerdo» (`sentido`) y los partidos comparados (`ACTORES`). Los partidos del Grupo Mixto se leen diputado a diputado.
+- `src/data/votos-congreso.json`: recuento por grupo y voto de los diputados del Mixto, generado desde los datos abiertos del Congreso con `bun run votos`. Vuelve a ejecutarlo al añadir o cambiar una votación.
+- `src/lib/cuestionario.ts`: postura de cada partido (+1 a favor, −1 en contra, 0 abstención; media si hay varias votaciones). La página explica el método y sus límites.
+
 ## Fuentes oficiales
 
 | Fuente | Qué se extrae |
