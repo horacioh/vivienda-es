@@ -82,6 +82,13 @@ describe("claveLimite", () => {
     expect(claveLimite("fe80::1%eth0")).toBe("fe80:0:0:0::/64");
   });
   test("IPv4 mapeada en IPv6", () => expect(claveLimite("::ffff:203.0.113.7")).toBe("203.0.113.7"));
+  test("IPv6 con IPv4 al final: todo el /64 comparte clave", () => {
+    const k = claveLimite("2001:db8:1:2:0:0:192.0.2.1");
+    expect(k).toBe("2001:db8:1:2::/64");
+    expect(claveLimite("2001:db8:1:2:0:0:198.51.100.9")).toBe(k);
+    expect(claveLimite("2001:db8:1:2::192.0.2.1")).toBe(k);
+    expect(claveLimite("64:ff9b::192.0.2.1")).toBe("64:ff9b:0:0::/64");
+  });
   test("sin IP", () => {
     expect(claveLimite(null)).toBe("?");
     expect(claveLimite("")).toBe("?");
@@ -91,6 +98,10 @@ describe("claveLimite", () => {
 describe("maxAge", () => {
   test("5 minutos lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(300));
   test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 60_000)).toBe(60));
+  test("no se cachea más allá de la medianoche UTC (cambia la foto diaria)", () => {
+    expect(maxAge(Date.parse("2026-10-12T23:59:00Z"))).toBe(60);
+    expect(maxAge(Date.parse("2026-10-12T23:59:59.500Z"))).toBe(1);
+  });
   test("durante y después de la veda, 5 minutos", () => {
     expect(maxAge(VEDA.desde + 1)).toBe(300);
     expect(maxAge(VEDA.hasta + 1)).toBe(300);

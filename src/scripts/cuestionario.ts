@@ -327,6 +327,10 @@ async function cargarOpiniones(recargar = false) {
     estado.textContent = `Todavía hay pocas respuestas. Las mostraremos a partir de ${d.minimo} cuestionarios compartidos.`;
     return;
   }
+  if (!Object.keys(d.afirmaciones).length) {
+    estado.textContent = `Todavía ninguna afirmación tiene ${d.minimo} respuestas. Las mostraremos cuando las tengan.`;
+    return;
+  }
   estado.textContent = `Basado en al menos ${d.total.toLocaleString("es-ES")} cuestionarios compartidos hasta ayer. Se actualiza una vez al día y solo se muestran las afirmaciones con ${d.minimo} respuestas o más.`;
   for (const a of datos.afirmaciones) {
     const c = d.afirmaciones[a.id];

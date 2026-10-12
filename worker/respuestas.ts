@@ -59,10 +59,14 @@ export async function verificarTurnstile(
   return r.success === true && r.action === ACCION && !!r.hostname && o.hostnames.has(r.hostname);
 }
 
-/** Seconds a /api/resultados response may be cached: never past the start of the blackout. */
+/**
+ * Seconds a /api/resultados response may be cached: never past the start of the blackout
+ * nor past the next UTC midnight, when the daily snapshot changes.
+ */
 export function maxAge(ahora: number, normal = 300) {
   const hastaVeda = Math.floor((VEDA.desde - ahora) / 1000);
-  return hastaVeda > 0 ? Math.min(normal, hastaVeda) : normal;
+  const hastaManana = Math.ceil((Math.floor(ahora / 86_400_000 + 1) * 86_400_000 - ahora) / 1000);
+  return Math.min(normal, hastaManana, hastaVeda > 0 ? hastaVeda : normal);
 }
 
 /**
@@ -74,7 +78,8 @@ export function claveLimite(ip: string | null | undefined): string {
   if (!v.includes(":")) return v || "?";
   const mapeada = v.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
   if (mapeada) return mapeada[1];
-  const partes = v.split("::");
+  // A trailing dotted quad (e.g. 64:ff9b::192.0.2.1) fills the last two groups.
+  const partes = v.replace(/(^|:)\d+\.\d+\.\d+\.\d+$/, "$10:0").split("::");
   if (partes.length > 2) return v;
   const trozos = (t: string) => (t ? t.split(":") : []);
   const izq = trozos(partes[0]);
