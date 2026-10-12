@@ -14,7 +14,10 @@ import { basename, join } from "node:path";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import YAML from "yaml";
-import { SEED_ACCOUNT, SEED_ORIGIN, novedadPath, seedHmId } from "../src/lib/seed";
+import { SEED_ACCOUNT, SEED_ORIGIN, listNovedadDocs, novedadPath, seedHmId } from "../src/lib/seed";
+import { normalizarUrl } from "../src/lib/fuentes";
+import { novedadSchema } from "../src/lib/novedad-schema";
+import { slugify } from "../src/lib/novedades";
 import { leerDirectorio, validarNovedades, type Fichero } from "./validate-novedades";
 
 // La clave llega mejor por entorno (SEED_CLI_KEYFILE con el .hmkey.json sin
@@ -35,6 +38,75 @@ if (fileIdx >= 0) {
 }
 
 const errores = validarNovedades(ficheros);
+
+// El validador replica el esquema a mano; además se aplica el esquema zod real
+// a los campos tal como los verá el loader (objetos viajan como JSON en los
+// metadatos). Sin esto, un `resultado` o `votos_por_grupo` mal formado se
+// publicaría y el siguiente build fallaría con el documento ya en Seed.
+const jsonAttr = (v: unknown): unknown => {
+  if (typeof v !== "string") return v;
+  try {
+    const p = JSON.parse(v);
+    return p && typeof p === "object" ? p : v;
+  } catch {
+    return v;
+  }
+};
+for (const { nombre, contenido } of ficheros) {
+  const m = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/.exec(contenido);
+  if (!m) continue; // ya lo reporta validarNovedades
+  const fm = YAML.parse(m[1]) as Record<string, unknown>;
+  const parse = novedadSchema.safeParse({
+    fecha: fm.fecha instanceof Date ? fm.fecha : new Date(String(fm.fecha)),
+    titulo: fm.titulo,
+    resumen: fm.resumen,
+    tipo: fm.tipo,
+    partido: fm.partido,
+    institucion: fm.institucion,
+    estado: fm.estado,
+    fuente_url: fm.fuente_url,
+    fuente_nombre: fm.fuente_nombre,
+    resultado: jsonAttr(fm.resultado),
+    votos_por_grupo: jsonAttr(fm.votos_por_grupo),
+  });
+  if (!parse.success) {
+    errores.push(`${nombre}: no cumple el esquema de la colección: ${parse.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")}`);
+  }
+}
+
+// Deduplica también contra lo ya publicado en Seed: validarNovedades solo ve
+// los ficheros de esta ejecución, y un duplicado con otro slug haría fallar
+// el build por las reglas del loader. Mismo slug no es duplicado: es update.
+const publicados = await listNovedadDocs();
+const clavesSeed = new Map<string, string>();
+for (const info of publicados) {
+  const slug = info.path.replace(new RegExp(`^/?novedades/?`), "");
+  if (!slug || slug.includes("/")) continue;
+  const m = info.metadata;
+  const r = jsonAttr(m.resultado) as { si?: number; no?: number; abstencion?: number } | undefined;
+  const votos = m.tipo === "votacion" && r ? `|${r.si}-${r.no}-${r.abstencion ?? 0}` : "";
+  if (typeof m.fuente_url === "string") clavesSeed.set(`${normalizarUrl(m.fuente_url)}|${m.tipo}${votos}`, slug);
+  const fecha = new Date(String(m.fecha ?? m.displayPublishTime)).toISOString().slice(0, 10);
+  if (typeof m.titulo === "string") clavesSeed.set(`${fecha}|${slugify(m.titulo)}`, slug);
+}
+for (const { nombre, contenido } of ficheros) {
+  const slug = nombre.replace(/\.md$/, "");
+  const m = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/.exec(contenido);
+  if (!m) continue;
+  const fm = YAML.parse(m[1]) as Record<string, unknown>;
+  const r = fm.resultado as { si?: number; no?: number; abstencion?: number } | undefined;
+  const votos = fm.tipo === "votacion" && r && typeof r === "object" ? `|${r.si}-${r.no}-${r.abstencion ?? 0}` : "";
+  const fecha = fm.fecha instanceof Date ? fm.fecha.toISOString().slice(0, 10) : String(fm.fecha).slice(0, 10);
+  const candidatas = [
+    `${normalizarUrl(String(fm.fuente_url))}|${fm.tipo}${votos}`,
+    `${fecha}|${slugify(String(fm.titulo))}`,
+  ];
+  for (const clave of candidatas) {
+    const previo = clavesSeed.get(clave);
+    if (previo && previo !== slug) errores.push(`${nombre}: duplicada en Seed con el documento /novedades/${previo}`);
+  }
+}
+
 if (errores.length) {
   console.error(`✗ ${errores.length} error(es):\n${errores.map((e) => `  - ${e}`).join("\n")}`);
   process.exit(1);

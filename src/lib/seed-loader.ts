@@ -72,6 +72,8 @@ export function novedadesSeedLoader(): Loader {
           rendered: { html: renderBloques(doc.content) },
         });
       }
+      // Solo un doc índice (/novedades) también desplegaría la portada vacía.
+      if (!store.keys().length) throw new Error(`Seed no devolvió novedades válidas (¿falta publicar en ${NOVEDADES_PATH}?)`);
       logger.info(`${store.keys().length} novedades desde Seed`);
     },
   };

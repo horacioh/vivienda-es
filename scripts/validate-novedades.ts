@@ -121,9 +121,11 @@ export function leerDirectorio(dir = DIR): Fichero[] {
       .filter((f) => f.endsWith(".md") && f !== "README.md")
       .sort()
       .map((nombre) => ({ nombre, contenido: readFileSync(join(dir, nombre), "utf8") }));
-  } catch {
-    // El directorio desaparece una vez las novedades viven solo en Seed.
-    return [];
+  } catch (e) {
+    // El directorio desaparece una vez las novedades viven solo en Seed;
+    // cualquier otro fallo de lectura debe romper la validación.
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw e;
   }
 }
 

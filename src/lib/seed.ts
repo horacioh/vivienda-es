@@ -76,26 +76,33 @@ async function apiGet<T>(key: string, params: Record<string, string>): Promise<T
 export async function listNovedadDocs(): Promise<SeedDocumentInfo[]> {
   // Importación perezosa: solo se usa en build, no en el JS del navegador.
   const { encode: cborEncode } = await import("@ipld/dag-cbor");
-  const body = cborEncode({
-    filter: {
-      and: {
-        filters: [
-          { spaceMatch: { space: SEED_ACCOUNT } },
-          { pathMatch: { path: `/${NOVEDADES_PATH}`, prefix: true } },
-        ],
+  const docs: SeedDocumentInfo[] = [];
+  let pageToken: string | undefined;
+  do {
+    const body = cborEncode({
+      filter: {
+        and: {
+          filters: [
+            { spaceMatch: { space: SEED_ACCOUNT } },
+            { pathMatch: { path: `/${NOVEDADES_PATH}`, prefix: true } },
+          ],
+        },
       },
-    },
-    sort: [{ attribute: "BUILTIN_SORT_ATTRIBUTE_PATH" }],
-    pageSize: 500,
-  });
-  const res = await fetch(`${SEED_ORIGIN}/api/QueryDocuments`, {
-    method: "POST",
-    headers: { "content-type": "application/cbor" },
-    body: body as unknown as BodyInit,
-  });
-  if (!res.ok) throw new Error(`Seed /api/QueryDocuments respondió ${res.status}`);
-  const data = (await res.json()) as { documents?: SeedDocumentInfo[] };
-  return data.documents ?? [];
+      sort: [{ attribute: "BUILTIN_SORT_ATTRIBUTE_PATH" }],
+      pageSize: 500,
+      ...(pageToken ? { pageToken } : {}),
+    });
+    const res = await fetch(`${SEED_ORIGIN}/api/QueryDocuments`, {
+      method: "POST",
+      headers: { "content-type": "application/cbor" },
+      body: body as unknown as BodyInit,
+    });
+    if (!res.ok) throw new Error(`Seed /api/QueryDocuments respondió ${res.status}`);
+    const data = (await res.json()) as { documents?: SeedDocumentInfo[]; nextPageToken?: string };
+    docs.push(...(data.documents ?? []));
+    pageToken = data.nextPageToken || undefined;
+  } while (pageToken);
+  return docs;
 }
 
 /** Documento completo (contenido + metadatos) en una ruta de la cuenta del sitio. */
