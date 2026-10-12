@@ -107,8 +107,12 @@ código de Worker). Configuración en el dashboard (Worker → Settings → Buil
   imagen de build trae Bun 1.2.15, que no lee el formato actual de `bun.lock`, y Cloudflare solo acepta
   la versión de Bun por variable, no por fichero). Opcional: `SITE_URL` si usas un dominio propio.
 
-**Actualizar Bun:** cambia `.bun-version` (lo lee el CI de GitHub), ejecuta `bun install` con esa
-versión para regenerar `bun.lock`, y pon el mismo valor en `BUN_VERSION` en Cloudflare.
+**Actualizar Bun:** cambia `.bun-version` (lo lee el CI de GitHub) y pon el mismo valor en
+`BUN_VERSION` en Cloudflare.
+
+`bun.lock` está en formato `lockfileVersion: 1` (generado con Bun 1.2.15) para que la imagen de
+Cloudflare lo lea aunque no vea `BUN_VERSION`; Bun 1.4 lo lee y lo mantiene en v1 con `bun install`
+y `bun add`. Si algún día pasa a v2 (`"lockfileVersion": 2`), `BUN_VERSION` es imprescindible.
 
 `.github/workflows/deploy.yml` solo hace de CI en GitHub. Para publicar a mano:
 `bun run build && bun run deploy`.
