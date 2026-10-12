@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MINIMO, VEDA, enVeda, maxAge, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
+import { BORRADO, MINIMO, VEDA, cerrado, enVeda, maxAge, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -40,6 +40,17 @@ describe("resultados", () => {
   });
 });
 
+describe("borrado", () => {
+  test("acepta envíos hasta el 31 de diciembre de 2026", () => {
+    expect(cerrado(Date.parse("2026-12-31T22:59:59Z"))).toBe(false);
+    expect(cerrado(Date.parse("2026-12-31T23:00:00Z"))).toBe(true);
+  });
+  test("después del borrado no hay cifras", () => {
+    expect(resultados(500, [], BORRADO)).toEqual({ veda: false, cerrado: true, minimo: MINIMO });
+  });
+  test("no se cachea más allá del borrado", () => expect(maxAge(BORRADO - 30_000)).toBe(30));
+});
+
 describe("maxAge", () => {
   test("5 minutos lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(300));
   test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 60_000)).toBe(60));
@@ -71,10 +82,10 @@ describe("verificarTurnstile", () => {
     expect(await verificarTurnstile("", o, nunca)).toBe(false);
     expect(await verificarTurnstile("x".repeat(2049), o, nunca)).toBe(false);
   });
-  test("envía remoteip si hay IP", async () => {
+  test("no envía la IP a Cloudflare", async () => {
     let enviado = "";
     const espia = (async (_u: string, i: RequestInit) => ((enviado = String(i.body)), new Response(JSON.stringify(bueno)))) as unknown as typeof fetch;
-    await verificarTurnstile("t", { ...o, ip: "203.0.113.1" }, espia);
-    expect(enviado).toContain("remoteip=203.0.113.1");
+    await verificarTurnstile("t", o, espia);
+    expect(enviado).not.toContain("remoteip");
   });
 });

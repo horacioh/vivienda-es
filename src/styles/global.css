@@ -96,3 +96,20 @@ body {
 [hidden] {
   display: none !important;
 }
+
+.prose-legal h2 {
+  margin-top: 2rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+.prose-legal h3 {
+  margin-top: 1.4rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.prose-legal b { color: var(--color-ink); }
