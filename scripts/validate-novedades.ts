@@ -7,7 +7,7 @@
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { YAML } from "bun";
+import YAML from "yaml";
 import { esFuenteOficial, normalizarUrl } from "../src/lib/fuentes";
 import { ESTADOS, NOMBRE_FICHERO, TIPOS, slugify } from "../src/lib/novedades";
 

@@ -22,6 +22,7 @@
     "@astrojs/check": "^0.9.10",
     "@types/bun": "latest",
     "typescript": "^5.6.3",
-    "wrangler": "^4.65.0"
+    "wrangler": "^4.65.0",
+    "yaml": "^2.9.1"
   }
 }
