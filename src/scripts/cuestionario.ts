@@ -285,7 +285,7 @@ btnCompartir.addEventListener("click", async () => {
     localStorage.setItem(COMPARTIDO, new Date().toISOString().slice(0, 10));
   } catch {}
   btnCompartir.hidden = true;
-  estadoCompartir.textContent = "Gracias. Tus respuestas se han añadido de forma anónima y contarán en los resultados a partir de mañana.";
+  estadoCompartir.textContent = "Gracias. Tus respuestas se han añadido de forma anónima y contarán en los resultados cuando se completen 10 cuestionarios nuevos.";
   cargarOpiniones(true);
 });
 
@@ -295,6 +295,8 @@ interface Opiniones {
   minimo: number;
   turnstile?: string;
   total?: number;
+  /** Los resultados se actualizan cada `lote` cuestionarios nuevos. */
+  lote?: number;
   /** Porcentajes enteros por afirmación (favor + neutral + contra = 100). */
   afirmaciones?: Record<string, { favor: number; neutral: number; contra: number; importa: number }>;
 }
@@ -336,7 +338,7 @@ async function cargarOpiniones(recargar = false) {
     estado.textContent = `Todavía ninguna afirmación tiene ${d.minimo} respuestas. Las mostraremos cuando las tengan.`;
     return;
   }
-  estado.textContent = `Basado en al menos ${d.total.toLocaleString("es-ES")} cuestionarios compartidos hasta ayer. Se actualiza una vez al día y solo se muestran las afirmaciones con ${d.minimo} respuestas o más.`;
+  estado.textContent = `Basado en ${d.total.toLocaleString("es-ES")} cuestionarios compartidos. Se actualiza cada ${d.lote ?? 10} cuestionarios nuevos y solo se muestran las afirmaciones con ${d.minimo} respuestas o más.`;
   for (const a of datos.afirmaciones) {
     const c = d.afirmaciones[a.id];
     if (!c) continue;

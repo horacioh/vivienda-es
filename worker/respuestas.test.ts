@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { BORRADO, MINIMO, VEDA, cerrado, claveLimite, corte, enVeda, maxAge, redondear, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
+import { BORRADO, MINIMO, VEDA, cerrado, claveLimite, enVeda, LOTE, publicables, maxAge, redondear, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -42,7 +42,7 @@ describe("resultados", () => {
     const poca = { id: "sareb", favor: MINIMO - 2, neutral: 0, contra: 1, importa: 0 };
     expect(resultados(40, [fila, poca], fuera).afirmaciones).not.toHaveProperty("sareb");
   });
-  test("redondea el total a la decena inferior", () => {
+  test("publica el total del último lote completo", () => {
     expect(resultados(47, [], fuera).total).toBe(40);
     expect(resultados(MINIMO, [], fuera).total).toBe(30);
   });
@@ -61,10 +61,18 @@ describe("redondear", () => {
   });
 });
 
-describe("corte diario", () => {
-  test("solo cuentan los envíos de días anteriores (UTC)", () => {
-    expect(corte(Date.parse("2026-10-12T00:00:00Z"))).toBe("2026-10-12");
-    expect(corte(Date.parse("2026-10-12T23:59:59Z"))).toBe("2026-10-12");
+describe("lotes", () => {
+  test("solo cuentan los lotes completos de LOTE envíos", () => {
+    expect(LOTE).toBe(10);
+    expect(publicables(0)).toBe(0);
+    expect(publicables(39)).toBe(30);
+    expect(publicables(40)).toBe(40);
+  });
+  test("las cifras cambian cada LOTE envíos, nunca por uno solo", () => {
+    for (let n = 1; n <= 200; n++) {
+      const d = publicables(n) - publicables(n - 1);
+      expect(d === 0 || d === LOTE).toBe(true);
+    }
   });
 });
 
@@ -110,20 +118,16 @@ describe("borrado", () => {
 });
 
 describe("maxAge", () => {
-  test("5 minutos lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(300));
-  test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 60_000)).toBe(60));
-  test("no se cachea más allá de la medianoche UTC (cambia la foto diaria)", () => {
-    expect(maxAge(Date.parse("2026-10-12T23:59:00Z"))).toBe(60);
-    expect(maxAge(Date.parse("2026-10-12T23:59:59.500Z"))).toBe(0);
-  });
+  test("1 minuto lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(60));
+  test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 30_000)).toBe(30));
   test("en el último segundo antes de la veda, 0", () => {
     expect(maxAge(VEDA.desde - 500)).toBe(0);
     expect(maxAge(VEDA.desde - 1)).toBe(0);
     expect(maxAge(VEDA.desde - 1000)).toBe(1);
   });
-  test("durante y después de la veda, 5 minutos", () => {
-    expect(maxAge(VEDA.desde + 1)).toBe(300);
-    expect(maxAge(VEDA.hasta + 1)).toBe(300);
+  test("durante y después de la veda, 1 minuto", () => {
+    expect(maxAge(VEDA.desde + 1)).toBe(60);
+    expect(maxAge(VEDA.hasta + 1)).toBe(60);
   });
 });
 
