@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MINIMO, VEDA, enVeda, maxAge, resultados, validar } from "./respuestas";
+import { MINIMO, VEDA, enVeda, maxAge, resultados, validar, verificarTurnstile } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -46,5 +46,18 @@ describe("maxAge", () => {
   test("durante y después de la veda, 5 minutos", () => {
     expect(maxAge(VEDA.desde + 1)).toBe(300);
     expect(maxAge(VEDA.hasta + 1)).toBe(300);
+  });
+});
+
+describe("verificarTurnstile", () => {
+  const responde = (r: unknown, ok = true) => (async () => new Response(JSON.stringify(r), { status: ok ? 200 : 500 })) as unknown as typeof fetch;
+  test("acepta un token válido", async () => expect(await verificarTurnstile("t", "s", responde({ success: true }))).toBe(true));
+  test("rechaza si Cloudflare dice que no", async () => expect(await verificarTurnstile("t", "s", responde({ success: false }))).toBe(false));
+  test("rechaza si Cloudflare falla", async () => expect(await verificarTurnstile("t", "s", responde({}, false))).toBe(false));
+  test("sin secret o sin token no se acepta nada", async () => {
+    const nunca = (() => { throw new Error("no debería llamar"); }) as unknown as typeof fetch;
+    expect(await verificarTurnstile("t", undefined, nunca)).toBe(false);
+    expect(await verificarTurnstile("", "s", nunca)).toBe(false);
+    expect(await verificarTurnstile(42, "s", nunca)).toBe(false);
   });
 });

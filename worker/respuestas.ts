@@ -27,6 +27,16 @@ export const enVeda = (t: number) => t >= VEDA.desde && t < VEDA.hasta;
 /** Por debajo de este número de envíos no se publican porcentajes. */
 export const MINIMO = 30;
 
+export const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+/** Checks a Cloudflare Turnstile token. Without a configured secret, nothing is accepted. */
+export async function verificarTurnstile(token: unknown, secret: string | undefined, f: typeof fetch = fetch) {
+  if (!secret || typeof token !== "string" || !token || token.length > 2048) return false;
+  const res = await f(SITEVERIFY, { method: "POST", body: new URLSearchParams({ secret, response: token }) });
+  if (!res.ok) return false;
+  return ((await res.json()) as { success?: boolean }).success === true;
+}
+
 /** Seconds a /api/resultados response may be cached: never past the start of the blackout. */
 export function maxAge(ahora: number, normal = 300) {
   const hastaVeda = Math.floor((VEDA.desde - ahora) / 1000);

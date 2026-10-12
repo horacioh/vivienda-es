@@ -188,6 +188,49 @@ function yaCompartido() {
   }
 }
 
+interface Turnstile {
+  render(el: HTMLElement, o: Record<string, unknown>): string;
+  execute(id: string): void;
+  reset(id: string): void;
+}
+declare global {
+  interface Window { turnstile?: Turnstile }
+}
+
+let sitekey = "";
+let widget: string | undefined;
+let pedirToken: ((t: string | null) => void) | undefined;
+
+function cargarTurnstile(): Promise<Turnstile> {
+  if (window.turnstile) return Promise.resolve(window.turnstile);
+  return new Promise((ok, mal) => {
+    const s = document.createElement("script");
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.async = true;
+    s.onload = () => (window.turnstile ? ok(window.turnstile) : mal(new Error("turnstile")));
+    s.onerror = mal;
+    document.head.append(s);
+  });
+}
+
+async function token(): Promise<string | null> {
+  const ts = await cargarTurnstile();
+  const listo = new Promise<string | null>((ok) => (pedirToken = ok));
+  if (widget === undefined) {
+    widget = ts.render($("r-turnstile"), {
+      sitekey,
+      execution: "execute",
+      appearance: "interaction-only",
+      language: "es",
+      callback: (t: string) => pedirToken?.(t),
+      "error-callback": () => pedirToken?.(null),
+      "timeout-callback": () => pedirToken?.(null),
+    });
+  } else ts.reset(widget);
+  ts.execute(widget);
+  return listo;
+}
+
 let hayApi = false;
 let enviando = false;
 let contestadasAhora = 0;
@@ -214,11 +257,14 @@ btnCompartir.addEventListener("click", async () => {
   estadoCompartir.textContent = "Enviando…";
   let error = "No se han podido enviar. Inténtalo de nuevo.";
   try {
+    const t = await token().catch(() => null);
+    if (!t) throw new Error(error);
     const res = await fetch(api("respuestas"), {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ respuestas: envio }),
+      body: JSON.stringify({ respuestas: envio, token: t }),
     });
+    if (res.status === 403) error = "No se ha podido comprobar que no eres un robot. Inténtalo de nuevo.";
     if (res.status === 429) error = "Has enviado varias veces seguidas. Prueba dentro de un minuto.";
     if (!res.ok) throw new Error(error);
   } catch {
@@ -239,6 +285,7 @@ btnCompartir.addEventListener("click", async () => {
 interface Opiniones {
   veda: boolean;
   minimo: number;
+  turnstile?: string;
   total?: number;
   afirmaciones?: Record<string, { favor: number; neutral: number; contra: number; importa: number }>;
 }
@@ -258,8 +305,9 @@ async function cargarOpiniones(recargar = false) {
   } catch {
     return;
   }
-  hayApi = true;
-  prepararCompartir();
+  if (!d.turnstile) return;
+  sitekey = d.turnstile;
+  if (!hayApi) (hayApi = true), prepararCompartir();
   $("opiniones").hidden = false;
   const estado = $("op-estado"), lista = $("op-lista");
   lista.replaceChildren();

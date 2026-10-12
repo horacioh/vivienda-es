@@ -20,6 +20,12 @@
     }
   ],
   // Máximo de envíos por IP y minuto; la IP no se guarda.
+  // Clave pública del widget de Cloudflare Turnstile (antirrobots al compartir respuestas). La clave
+  // secreta va como secret del Worker: `TURNSTILE_SECRET` (Settings → Variables and Secrets).
+  // En local, `.dev.vars` (ver README).
+  "vars": {
+    "TURNSTILE_SITEKEY": "1x00000000000000000000AA"
+  },
   "ratelimits": [
     {
       "name": "LIMITE",
