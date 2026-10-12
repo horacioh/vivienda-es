@@ -57,6 +57,11 @@ describe("borrado", () => {
 describe("maxAge", () => {
   test("5 minutos lejos de la veda", () => expect(maxAge(VEDA.desde - 3600_000)).toBe(300));
   test("no se cachea más allá del inicio de la veda", () => expect(maxAge(VEDA.desde - 60_000)).toBe(60));
+  test("en el último segundo antes de la veda, 0", () => {
+    expect(maxAge(VEDA.desde - 500)).toBe(0);
+    expect(maxAge(VEDA.desde - 1)).toBe(0);
+    expect(maxAge(VEDA.desde - 1000)).toBe(1);
+  });
   test("durante y después de la veda, 5 minutos", () => {
     expect(maxAge(VEDA.desde + 1)).toBe(300);
     expect(maxAge(VEDA.hasta + 1)).toBe(300);
