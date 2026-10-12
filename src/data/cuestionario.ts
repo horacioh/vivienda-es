@@ -156,8 +156,8 @@ export const AFIRMACIONES: Afirmacion[] = [
   {
     id: "sareb",
     tema: "Vivienda pública",
-    texto: "Las viviendas de la Sareb deberían pasar a las comunidades autónomas que lo pidan, para gestionarlas ellas.",
-    contexto: "Proposición no de ley del BNG para transferir a Galicia los activos inmobiliarios de la Sareb situados allí.",
+    texto: "La Sareb debería transferir a la Xunta de Galicia las viviendas y suelos que tiene en Galicia, para que los gestione como vivienda pública.",
+    contexto: "Proposición no de ley del BNG para transferir a Galicia los activos inmobiliarios de la Sareb situados allí. Es la única votación del Pleno sobre traspasar activos de la Sareb a una comunidad; no hubo una votación general para todas.",
     evidencias: [
       {
         votacion: "/webpublica/opendata/votaciones/Leg15/Sesion134/20250924/Votacion002/VOT_20250924171304.json",

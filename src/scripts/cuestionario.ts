@@ -34,7 +34,11 @@ function pintar() {
   $<HTMLButtonElement>("q-atras").disabled = paso === 0;
 }
 
+let pendiente: ReturnType<typeof setTimeout> | undefined;
+
 function avanzar() {
+  clearTimeout(pendiente);
+  pendiente = undefined;
   if (paso < n - 1) {
     paso++;
     pintar();
@@ -44,17 +48,21 @@ function avanzar() {
 
 for (const b of botones) {
   b.addEventListener("click", () => {
+    if (pendiente) return;
     respuestas[paso] = { valor: Number(b.dataset.valor), importa: importa.checked };
     for (const o of botones) o.setAttribute("aria-pressed", String(o === b));
-    setTimeout(avanzar, 160);
+    pendiente = setTimeout(avanzar, 160);
   });
 }
 importa.addEventListener("change", () => (respuestas[paso].importa = importa.checked));
 $("q-atras").addEventListener("click", () => {
+  clearTimeout(pendiente);
+  pendiente = undefined;
   if (paso > 0) paso--;
   pintar();
 });
 $("q-saltar").addEventListener("click", () => {
+  if (pendiente) return;
   respuestas[paso] = { valor: null, importa: false };
   avanzar();
 });
