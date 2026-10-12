@@ -19,7 +19,7 @@
       "database_id": "757916f2-f21c-4d55-88cc-0d4c560997c3"
     }
   ],
-  // Máximo de envíos por IP y minuto; la IP no se guarda.
+  // Máximo de envíos por minuto por IPv4 o prefijo /64 de IPv6 (`claveLimite`); la IP no se guarda.
   // Clave pública del widget de Cloudflare Turnstile (antirrobots al compartir respuestas). La clave
   // secreta va como secret del Worker: `TURNSTILE_SECRET` (Settings → Variables and Secrets).
   // En local, `.dev.vars` (ver README).

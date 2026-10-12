@@ -285,7 +285,7 @@ btnCompartir.addEventListener("click", async () => {
     localStorage.setItem(COMPARTIDO, new Date().toISOString().slice(0, 10));
   } catch {}
   btnCompartir.hidden = true;
-  estadoCompartir.textContent = "Gracias. Tus respuestas se han añadido de forma anónima.";
+  estadoCompartir.textContent = "Gracias. Tus respuestas se han añadido de forma anónima y contarán en los resultados a partir de mañana.";
   cargarOpiniones(true);
 });
 
@@ -295,6 +295,7 @@ interface Opiniones {
   minimo: number;
   turnstile?: string;
   total?: number;
+  /** Porcentajes enteros por afirmación (favor + neutral + contra = 100). */
   afirmaciones?: Record<string, { favor: number; neutral: number; contra: number; importa: number }>;
 }
 
@@ -327,15 +328,18 @@ async function cargarOpiniones(recargar = false) {
     estado.textContent = "La ley electoral no permite publicar sondeos en los cinco días anteriores a la votación. Volveremos a mostrar estos resultados el 29 de noviembre, tras el cierre de los colegios.";
     return;
   }
-  if (!d.afirmaciones) {
-    estado.textContent = `Todavía hay pocas respuestas (${d.total ?? 0}). Las mostraremos a partir de ${d.minimo} cuestionarios compartidos.`;
+  if (!d.afirmaciones || !d.total) {
+    estado.textContent = `Todavía hay pocas respuestas. Las mostraremos a partir de ${d.minimo} cuestionarios compartidos.`;
     return;
   }
-  estado.textContent = `Basado en ${d.total!.toLocaleString("es-ES")} cuestionarios compartidos.`;
+  if (!Object.keys(d.afirmaciones).length) {
+    estado.textContent = `Todavía ninguna afirmación tiene ${d.minimo} respuestas. Las mostraremos cuando las tengan.`;
+    return;
+  }
+  estado.textContent = `Basado en al menos ${d.total.toLocaleString("es-ES")} cuestionarios compartidos hasta ayer. Se actualiza una vez al día y solo se muestran las afirmaciones con ${d.minimo} respuestas o más.`;
   for (const a of datos.afirmaciones) {
     const c = d.afirmaciones[a.id];
-    const t = c ? c.favor + c.neutral + c.contra : 0;
-    if (!c || !t) continue;
+    if (!c) continue;
     const fila = document.createElement("div");
     const cab = document.createElement("p");
     cab.className = "flex items-baseline justify-between gap-3 text-sm font-semibold";
@@ -343,10 +347,7 @@ async function cargarOpiniones(recargar = false) {
     nombre.href = `#af-${a.id}`;
     nombre.className = "hover:underline hover:underline-offset-4";
     nombre.textContent = a.corto;
-    const n = document.createElement("span");
-    n.className = "shrink-0 text-xs font-medium tabular-nums text-muted";
-    n.textContent = `${t.toLocaleString("es-ES")} respuestas`;
-    cab.append(nombre, n);
+    cab.append(nombre);
     const barra = document.createElement("div");
     barra.className = "mt-1.5 flex h-2.5 gap-0.5 overflow-hidden rounded-full";
     barra.setAttribute("aria-hidden", "true");
@@ -356,11 +357,11 @@ async function cargarOpiniones(recargar = false) {
       if (c[k]) {
         const s = document.createElement("span");
         s.className = color;
-        s.style.width = `${(c[k] / t) * 100}%`;
+        s.style.width = `${c[k]}%`;
         barra.append(s);
       }
       const l = document.createElement("span");
-      l.textContent = `${simbolo} ${Math.round((c[k] / t) * 100)} % ${texto}`;
+      l.textContent = `${simbolo} ${c[k]} % ${texto}`;
       leyenda.append(l);
     }
     fila.append(cab, barra, leyenda);
