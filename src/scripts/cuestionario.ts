@@ -123,6 +123,7 @@ function resultado() {
     requestAnimationFrame(() => requestAnimationFrame(() => (barra.style.width = `${a.pct ?? 0}%`)));
   }
   marcarTarjetas();
+  marcarTemas();
   r.scrollIntoView({ behavior: "smooth", block: "start" });
   $("r-titulo").focus({ preventScroll: true });
 }
@@ -151,6 +152,19 @@ function marcarTarjetas() {
       c.classList.toggle("coincide", p !== null && Math.abs(u.valor! - p) <= 0.5);
       c.classList.toggle("lejos", p !== null && Math.abs(u.valor! - p) > 1);
     });
+  });
+}
+
+function marcarTemas() {
+  document.querySelectorAll<HTMLElement>(".tema").forEach((el, i) => {
+    const u = respuestas[i].valor;
+    const k = u === null ? null : u > 0 ? "favor" : u < 0 ? "contra" : "medio";
+    el.querySelectorAll<HTMLElement>(".col").forEach((c) => {
+      const mia = c.dataset.col === k;
+      c.classList.toggle("mia", mia);
+      c.querySelector<HTMLElement>(".tu-marca")!.hidden = !mia;
+    });
+    el.querySelector(".tema-nota")!.textContent = u === null ? "Sin responder" : respuestas[i].importa ? "Te importa mucho" : "";
   });
 }
 

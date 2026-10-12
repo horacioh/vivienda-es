@@ -14,8 +14,8 @@
   --color-card: #fffdf9;
   --color-accent: #c0392b;
   --color-accent-dark: #9a2c20;
-  --color-si: #2f7d32;
-  --color-no: #c0392b;
+  --color-si: #0b6bb0;
+  --color-no: #c45200;
   --color-abst: #b9b1a5;
   --shadow-card: 0 0 0 1px rgb(23 20 15 / 0.07), 0 1px 2px rgb(23 20 15 / 0.04), 0 6px 16px -8px rgb(23 20 15 / 0.08);
 }
