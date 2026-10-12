@@ -1,6 +1,6 @@
 // Worker delante de los static assets: solo atiende /api/*; el resto lo sirve `dist/`.
 // Las respuestas compartidas se guardan sin IP, cookies ni identificador: solo el día y las respuestas.
-import { enVeda, hostnames, maxAge, resultados, validar, verificarTurnstile, type Fila } from "./respuestas";
+import { claveLimite, corte, enVeda, hostnames, maxAge, resultados, validar, verificarTurnstile, type Fila } from "./respuestas";
 
 interface D1Result<T> { results: T[] }
 interface D1Stmt { bind(...v: unknown[]): D1Stmt; run(): Promise<unknown>; all<T>(): Promise<D1Result<T>>; first<T>(): Promise<T | null> }
@@ -29,8 +29,8 @@ export default {
 
     if (pathname === "/api/respuestas") {
       if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
-      // La IP solo se usa en memoria para limitar envíos repetidos; no se guarda.
-      const { success } = await env.LIMITE.limit({ key: req.headers.get("cf-connecting-ip") ?? "?" });
+      // La IP (o su /64 en IPv6) solo se usa en memoria para limitar envíos repetidos; no se guarda.
+      const { success } = await env.LIMITE.limit({ key: claveLimite(req.headers.get("cf-connecting-ip")) });
       if (!success) return json({ error: "Demasiados envíos" }, 429);
       const body = await req.json().catch(() => null);
       const envio = validar(body);
@@ -52,7 +52,8 @@ export default {
       const cache = `public, max-age=${maxAge(ahora)}`;
       if (enVeda(ahora)) return json({ ...resultados(0, [], ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
       const d = await db(env);
-      const total = (await d.prepare("SELECT COUNT(*) AS n FROM envios").first<{ n: number }>())?.n ?? 0;
+      const hasta = corte(ahora);
+      const total = (await d.prepare("SELECT COUNT(*) AS n FROM envios WHERE fecha < ?").bind(hasta).first<{ n: number }>())?.n ?? 0;
       const { results } = await d
         .prepare(
           `SELECT j.key AS id,
@@ -60,8 +61,9 @@ export default {
              SUM(json_extract(j.value, '$[0]') = 0) AS neutral,
              SUM(json_extract(j.value, '$[0]') = -1) AS contra,
              SUM(json_extract(j.value, '$[1]') = 1) AS importa
-           FROM envios, json_each(envios.respuestas) AS j GROUP BY j.key`,
+           FROM envios, json_each(envios.respuestas) AS j WHERE envios.fecha < ? GROUP BY j.key`,
         )
+        .bind(hasta)
         .all<Fila>();
       return json({ ...resultados(total, results, ahora), turnstile: env.TURNSTILE_SITEKEY }, 200, cache);
     }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MINIMO, VEDA, enVeda, maxAge, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
+import { MINIMO, VEDA, claveLimite, corte, enVeda, maxAge, redondear, resultados, validar, verificarTurnstile, ACCION, hostnames } from "./respuestas";
 
 describe("validar", () => {
   test("acepta respuestas de afirmaciones conocidas", () => {
@@ -30,13 +30,61 @@ describe("veda electoral", () => {
 describe("resultados", () => {
   const fuera = Date.parse("2026-10-12T12:00:00Z");
   const fila = { id: "urbanismo", favor: 20, neutral: 5, contra: 10, importa: 3 };
-  test("no publica cifras con pocos envíos", () => {
-    expect(resultados(MINIMO - 1, [fila], fuera)).toEqual({ veda: false, minimo: MINIMO, total: MINIMO - 1 });
+  test("con pocos envíos no publica cifras ni el total", () => {
+    expect(resultados(MINIMO - 1, [fila], fuera)).toEqual({ veda: false, minimo: MINIMO });
   });
-  test("agrega por afirmación e ignora ids desconocidos", () => {
+  test("publica porcentajes redondeados, nunca recuentos, e ignora ids desconocidos", () => {
     expect(resultados(40, [fila, { ...fila, id: "otra" }], fuera).afirmaciones).toEqual({
-      urbanismo: { favor: 20, neutral: 5, contra: 10, importa: 3 },
+      urbanismo: { favor: 57, neutral: 14, contra: 29, importa: 9 },
     });
+  });
+  test("omite las afirmaciones con menos de MINIMO respuestas", () => {
+    const poca = { id: "sareb", favor: MINIMO - 2, neutral: 0, contra: 1, importa: 0 };
+    expect(resultados(40, [fila, poca], fuera).afirmaciones).not.toHaveProperty("sareb");
+  });
+  test("redondea el total a la decena inferior", () => {
+    expect(resultados(47, [], fuera).total).toBe(40);
+    expect(resultados(MINIMO, [], fuera).total).toBe(30);
+  });
+  test("un envío más no siempre cambia los porcentajes", () => {
+    const base = { id: "urbanismo", favor: 400, neutral: 100, contra: 500, importa: 300 };
+    const uno = { ...base, favor: 401, importa: 301 };
+    expect(resultados(1001, [uno], fuera)).toEqual(resultados(1000, [base], fuera));
+  });
+});
+
+describe("redondear", () => {
+  test("suma 100", () => {
+    expect(redondear([1, 1, 1])).toEqual([34, 33, 33]);
+    expect(redondear([20, 5, 10])).toEqual([57, 14, 29]);
+    expect(redondear([0, 0, 0])).toEqual([0, 0, 0]);
+  });
+});
+
+describe("corte diario", () => {
+  test("solo cuentan los envíos de días anteriores (UTC)", () => {
+    expect(corte(Date.parse("2026-10-12T00:00:00Z"))).toBe("2026-10-12");
+    expect(corte(Date.parse("2026-10-12T23:59:59Z"))).toBe("2026-10-12");
+  });
+});
+
+describe("claveLimite", () => {
+  test("IPv4 completa", () => expect(claveLimite("203.0.113.7")).toBe("203.0.113.7"));
+  test("IPv6: todas las direcciones de un /64 comparten clave", () => {
+    const k = claveLimite("2001:db8:1:2::1");
+    expect(k).toBe("2001:db8:1:2::/64");
+    expect(claveLimite("2001:0DB8:0001:0002:ffff:eeee:dddd:cccc")).toBe(k);
+    expect(claveLimite("2001:db8:1:2:abcd::")).toBe(k);
+    expect(claveLimite("2001:db8:1:3::1")).not.toBe(k);
+  });
+  test("IPv6 comprimida al principio y con zona", () => {
+    expect(claveLimite("::1")).toBe("0:0:0:0::/64");
+    expect(claveLimite("fe80::1%eth0")).toBe("fe80:0:0:0::/64");
+  });
+  test("IPv4 mapeada en IPv6", () => expect(claveLimite("::ffff:203.0.113.7")).toBe("203.0.113.7"));
+  test("sin IP", () => {
+    expect(claveLimite(null)).toBe("?");
+    expect(claveLimite("")).toBe("?");
   });
 });
 
