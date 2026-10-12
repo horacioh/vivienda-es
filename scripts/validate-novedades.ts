@@ -18,11 +18,34 @@ export interface Fichero {
   contenido: string;
 }
 
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+
 export function leerFrontmatter(contenido: string): Record<string, unknown> | null {
-  const m = contenido.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  const m = contenido.match(FRONTMATTER);
   if (!m) return null;
   const data = YAML.parse(m[1]);
   return data && typeof data === "object" ? (data as Record<string, unknown>) : null;
+}
+
+// Cualquier etiqueta, comentario o declaración HTML, salvo los autoenlaces Markdown <https://…>.
+const HTML = /<(?!(?:https?:\/\/|mailto:)[^\s<>]*>)[a-zA-Z!/?]/;
+// Destinos de enlaces/imágenes en línea `](url)` y de definiciones `[ref]: url`.
+const DESTINOS = /\]\(\s*<?([^\s)>]*)|^ {0,3}\[[^\]]+\]:\s*<?([^\s>]*)/gm;
+// Se exige el esquema literal: así `java&#x73;cript:` o `JaVa\tscript:` no pasan.
+const DESTINO_SEGURO = /^(?:https?:\/\/|mailto:|\/|#)/i;
+
+/** El cuerpo se publica en la página de detalle: solo Markdown, sin HTML ni
+ *  enlaces que no sean http(s), mailto, rutas del sitio o anclas. */
+export function erroresCuerpo(contenido: string): string[] {
+  const cuerpo = contenido.replace(FRONTMATTER, "");
+  const errores: string[] = [];
+  const html = HTML.exec(cuerpo);
+  if (html) errores.push(`el cuerpo no puede contener HTML (encontrado cerca de \`${cuerpo.slice(html.index, html.index + 30)}\`)`);
+  for (const m of cuerpo.matchAll(DESTINOS)) {
+    const destino = m[1] ?? m[2] ?? "";
+    if (!DESTINO_SEGURO.test(destino)) errores.push(`enlace no permitido en el cuerpo (solo https, mailto, / o #): \`${destino}\``);
+  }
+  return errores;
 }
 
 const texto = (v: unknown) => typeof v === "string" && v.trim().length > 0;
@@ -54,6 +77,7 @@ export function validarNovedades(ficheros: Fichero[]): string[] {
       err("falta el frontmatter (--- ... ---)");
       continue;
     }
+    for (const e of erroresCuerpo(contenido)) err(e);
 
     const fecha = isoFecha(d.fecha);
     if (!fecha) err("`fecha` es obligatoria y debe ser AAAA-MM-DD");

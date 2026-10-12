@@ -26,7 +26,7 @@ añade comprobaciones de nombre de fichero y duplicados.
 | `resultado` | `{ si, no, abstencion }` | no | Totales de una votación. |
 | `votos_por_grupo` | lista de `{ grupo, si, no, abstencion, ausentes? }` | no | Desglose por grupo parlamentario (datos abiertos del Congreso). |
 
-El cuerpo Markdown (opcional) se muestra en la página de detalle; solo debe contener hechos de la fuente.
+El cuerpo Markdown (opcional) se muestra en la página de detalle; solo debe contener hechos de la fuente. Solo Markdown: `bun run validate` rechaza HTML (`<etiquetas>`, comentarios) y enlaces que no sean `https://`, `mailto:`, `/ruta` o `#ancla`, y al publicar se elimina cualquier HTML crudo ([`src/lib/markdown-seguro.ts`](../../lib/markdown-seguro.ts)).
 
 ## Ejemplo
 
