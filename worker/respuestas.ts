@@ -31,6 +31,13 @@ export const cerrado = (t: number) => t >= BORRADO;
 /** Por debajo de este número de envíos (en total y por afirmación) no se publican porcentajes. */
 export const MINIMO = 30;
 
+/**
+ * Results are published in batches: only the oldest multiple of LOTE submissions count, so the
+ * figures change once every LOTE new submissions and two responses never differ by a single one.
+ */
+export const LOTE = 10;
+export const publicables = (n: number) => Math.floor(n / LOTE) * LOTE;
+
 export const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 export const ACCION = "compartir";
@@ -62,13 +69,9 @@ export async function verificarTurnstile(
   return r.success === true && r.action === ACCION && !!r.hostname && o.hostnames.has(r.hostname);
 }
 
-/**
- * Seconds a /api/resultados response may be cached: never past the start of the blackout, the
- * deletion date or the next UTC midnight (when the daily snapshot changes).
- */
-export function maxAge(ahora: number, normal = 300) {
-  const manana = (Math.floor(ahora / 86_400_000) + 1) * 86_400_000;
-  const limites = [VEDA.desde, BORRADO, manana].filter((t) => t > ahora).map((t) => Math.floor((t - ahora) / 1000));
+/** Seconds a /api/resultados response may be cached: never past the start of the blackout or the deletion date. */
+export function maxAge(ahora: number, normal = 60) {
+  const limites = [VEDA.desde, BORRADO].filter((t) => t > ahora).map((t) => Math.floor((t - ahora) / 1000));
   return Math.min(normal, ...limites);
 }
 
@@ -94,13 +97,6 @@ export function claveLimite(ip: string | null | undefined): string {
   return `${grupos.slice(0, 4).map((g) => parseInt(g, 16).toString(16)).join(":")}::/64`;
 }
 
-/**
- * Results are a daily snapshot: only submissions from previous days (UTC) count, so the
- * published figures change once a day and a single submission can't be isolated by
- * polling just before and after it.
- */
-export const corte = (ahora: number) => new Date(ahora).toISOString().slice(0, 10);
-
 /** Raw counts per statement (only ever used inside the Worker; never published). */
 export interface Fila { id: string; favor: number; neutral: number; contra: number; importa: number }
 
@@ -119,6 +115,7 @@ export function redondear(n: number[]): number[] {
   return out;
 }
 
+/** `total` and `filas` must already cover only the first `publicables(n)` submissions (by id). */
 export function resultados(total: number, filas: Fila[], ahora: number) {
   if (cerrado(ahora)) return { veda: false as const, cerrado: true as const, minimo: MINIMO };
   if (enVeda(ahora)) return { veda: true as const, minimo: MINIMO };
@@ -130,5 +127,5 @@ export function resultados(total: number, filas: Fila[], ahora: number) {
     const [favor, neutral, contra] = redondear([f.favor, f.neutral, f.contra]);
     afirmaciones[f.id] = { favor, neutral, contra, importa: Math.round((f.importa * 100) / n) };
   }
-  return { veda: false as const, minimo: MINIMO, total: Math.floor(total / 10) * 10, afirmaciones };
+  return { veda: false as const, minimo: MINIMO, lote: LOTE, total: publicables(total), afirmaciones };
 }
