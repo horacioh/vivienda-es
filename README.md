@@ -3,10 +3,10 @@
 Novedades diarias sobre **vivienda en España** — leyes, aprobaciones, propuestas de los partidos y
 votaciones en el Parlamento — **siempre con enlace a la fuente oficial**.
 
-- Web: https://vivienda-es.horacioh.workers.dev (Cloudflare Workers, static assets)
-- Filtros por URL: [`/?tipo=votacion`](https://vivienda-es.horacioh.workers.dev/?tipo=votacion),
-  [`/?partido=Sumar`](https://vivienda-es.horacioh.workers.dev/?partido=Sumar),
-  [`/?tipo=propuesta&partido=PP`](https://vivienda-es.horacioh.workers.dev/?tipo=propuesta&partido=PP)
+- Web: https://vivienda-es.hhg.app (Cloudflare Workers, static assets; dominio propio)
+- Filtros por URL: [`/?tipo=votacion`](https://vivienda-es.hhg.app/?tipo=votacion),
+  [`/?partido=Sumar`](https://vivienda-es.hhg.app/?partido=Sumar),
+  [`/?tipo=propuesta&partido=PP`](https://vivienda-es.hhg.app/?tipo=propuesta&partido=PP)
 
 ## Arquitectura
 
