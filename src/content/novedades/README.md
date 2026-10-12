@@ -15,7 +15,7 @@ añade comprobaciones de nombre de fichero y duplicados.
 | Campo | Tipo | Obligatorio | Descripción |
 | --- | --- | --- | --- |
 | `fecha` | fecha `AAAA-MM-DD` | sí | Fecha de publicación en la fuente oficial (BOE, nota de prensa, registro). |
-| `titulo` | texto | sí | Título claro en español. En la web enlaza a `fuente_url`. |
+| `titulo` | texto | sí | Título claro en español. En el feed enlaza a la página de detalle; ahí, a `fuente_url`. |
 | `resumen` | texto | sí | 1–3 frases neutrales con hechos de la fuente. |
 | `tipo` | `ley` \| `propuesta` \| `votacion` \| `aprobacion` \| `otro` | sí | Clase de novedad (filtro “Tipo”). |
 | `partido` | texto | no | Partido o grupo que la impulsa, con nombre corto: `PSOE`, `PP`, `VOX`, `Sumar`, `ERC`, `Junts`, `EH Bildu`, `PNV`, `BNG`, `CC`, `UPN`, `Podemos`, `Grupo Mixto` (filtro “Partido”). |

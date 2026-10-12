@@ -30,7 +30,7 @@ scripts/fetch-boe.ts         ← ayudante: ítems de vivienda del sumario del BO
   (`z.string().url()`) y además debe ser `https` y de un dominio oficial; si no, **el build falla**.
 - Mobile-first: una columna en móvil, filtros fijos arriba, objetivos táctiles ≥ 44 px; escala a
   escritorio con ancho de lectura limitado.
-- Cada tarjeta muestra fecha, tipo, partido/institución, título (enlazado a la fuente), resumen,
+- Cada tarjeta muestra fecha, tipo, partido/institución, título (enlazado a su página de detalle), resumen,
   estado y **“Ver fuente oficial →”** (`target="_blank" rel="noopener"`).
 
 ## Desarrollo local
