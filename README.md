@@ -21,7 +21,7 @@ src/scripts/filtros.ts       ← filtrado en cliente (tipo/partido) sincronizado
 scripts/validate-novedades.ts← validación + deduplicación (Bun) antes del build/commit
 scripts/fetch-boe.ts         ← ayudante: ítems de vivienda del sumario del BOE (API de datos abiertos)
 .agents/daily-update.md      ← prompt de la actualización diaria (lo ejecuta una automation de Devin)
-.github/workflows/deploy.yml ← test + build + `wrangler pages deploy` en cada push a main
+.github/workflows/deploy.yml ← CI: test + typecheck + build en cada push y PR
 ```
 
 - **Astro estático** (`output: "static"`), Tailwind CSS v4 vía `@tailwindcss/vite`, mismo patrón que
@@ -86,7 +86,7 @@ La lista exacta de dominios admitidos está en [`src/lib/fuentes.ts`](src/lib/fu
    `src/content/novedades/`; y crea los nuevos `.md` respetando el esquema.
 2. Ejecuta `bun run validate`, `bun test` y `bun run build`.
 3. Hace commit (`novedades: AAAA-MM-DD (N nuevas)`) y push a `main`.
-4. El push dispara `.github/workflows/deploy.yml`, que valida, construye y publica en Cloudflare Pages.
+4. El push a `main` dispara el build y el despliegue en Cloudflare Pages (integración Git).
 
 Para lanzarla a mano: abre una sesión de Devin en este repo con el prompt
 “Sigue `.agents/daily-update.md`”.
@@ -95,21 +95,18 @@ Para lanzarla a mano: abre una sesión de Devin en este repo con el prompt
 
 ### Cloudflare Pages (por defecto)
 
-`.github/workflows/deploy.yml` ejecuta en cada push a `main`:
+El repo está conectado a Cloudflare Pages con la integración Git: cada push a `main` construye y
+publica, y cada PR genera un preview. Configuración del proyecto (Settings → Builds):
 
-```bash
-bun install --frozen-lockfile && bun test && bun run typecheck && bun run build
-bunx wrangler pages deploy dist --project-name=vivienda-es --branch=main
-```
+- Build command: `bun run build`
+- Build output directory: `dist`
+- Variables de entorno (build): **`BUN_VERSION=1.4.3`** (obligatoria: la imagen de Cloudflare trae
+  Bun 1.2.15, que no lee el formato actual de `bun.lock`; Cloudflare solo acepta la versión de Bun por
+  variable, no por fichero). Opcional: `SITE_URL` si usas un dominio propio (por defecto
+  `https://vivienda-es.pages.dev`).
 
-Configuración una sola vez:
-
-1. Crea el proyecto: `bunx wrangler pages project create vivienda-es --production-branch=main`
-   (o en el dashboard: Workers & Pages → Create → Pages → Direct Upload, nombre `vivienda-es`).
-2. En GitHub → Settings → Secrets and variables → Actions:
-   - Secret `CLOUDFLARE_API_TOKEN` (token con permiso *Cloudflare Pages: Edit*).
-   - Secret `CLOUDFLARE_ACCOUNT_ID`.
-   - Variable opcional `SITE_URL` si usas un dominio propio (por defecto `https://vivienda-es.pages.dev`).
+`.github/workflows/deploy.yml` solo hace de CI (test + typecheck + build) en GitHub. Para publicar a
+mano sin la integración Git: `bun run build && bunx wrangler pages deploy dist --project-name=vivienda-es`.
 
 ### GitHub Pages (alternativa)
 
