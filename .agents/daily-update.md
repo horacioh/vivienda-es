@@ -28,8 +28,9 @@ Usa un User-Agent de navegador: congreso.es y mivau.gob.es devuelven 403 sin él
 devolviendo 403 con el User-Agent, **no reintentes ni busques rodeos**: anótalo en el resumen y sigue.
 
 Las fuentes 1, 2 y 4 se consultan **cada día**. Senado (3) y partidos (5) solo los **lunes** (hora de
-Madrid), con una ventana de los últimos 14 días: así, si falla un lunes, el siguiente cubre las
-dos semanas (la deduplicación del paso 3 evita repetir).
+Madrid), con una ventana de los últimos 14 días o la del paso 0 si es más larga (tras una parada
+larga). Así, si falla un lunes, el siguiente cubre las dos semanas; la deduplicación del paso 3 evita
+repetir.
 
 1. **BOE** — https://www.boe.es
    - Ayudante: `bun run scripts/fetch-boe.ts <desde AAAA-MM-DD> <hasta AAAA-MM-DD>` lista los
