@@ -15,8 +15,8 @@
     {
       "binding": "DB",
       "database_name": "vivienda-es",
-      // ID de la base de datos D1 creada en el dashboard de Cloudflare.
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      // ID de la base de datos D1 `vivienda-es` (Cloudflare → Storage & Databases → D1).
+      "database_id": "757916f2-f21c-4d55-88cc-0d4c560997c3"
     }
   ],
   // Máximo de envíos por IP y minuto; la IP no se guarda.
