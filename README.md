@@ -10,12 +10,14 @@ votaciones en el Parlamento — **siempre con enlace a la fuente oficial**.
 
 ## Revisar y auditar el proyecto
 
-Todo lo que publica la web sale de este repositorio: no hay CMS ni base de datos de contenido, y el
-historial de git muestra quién cambió qué y cuándo (las novedades diarias las añade una automation de
-Devin con commits `novedades: AAAA-MM-DD`). Para comprobarlo:
+Las novedades viven en **Seed** — una automation de Devin las publica cada día en
+[vivienda-es.hyper.media](https://vivienda-es.hyper.media) (cuenta
+`hm://z6Mkpqer25JrVxzoMobHUCkCv1r4fhiqTWwPWGrhcdGQVHHw`, ruta `/novedades/<slug>`), y la web las lee
+de ahí en el build. El resto del contenido (cuestionario, método, legales) sigue en este
+repositorio. Para comprobarlo:
 
-- **Una novedad:** cada fichero de `src/content/novedades/` tiene `fuente_url`, el documento oficial.
-  El build falla si la URL no es `https` de un dominio de [`src/lib/fuentes.ts`](src/lib/fuentes.ts).
+- **Una novedad:** cada documento de `/novedades/` lleva `fuente_url`, el documento oficial. El
+  build falla si la URL no es `https` de un dominio de [`src/lib/fuentes.ts`](src/lib/fuentes.ts).
 - **La postura de un partido:** cada afirmación de [`src/data/cuestionario.ts`](src/data/cuestionario.ts)
   lista sus votaciones (`votacion` es la ruta del JSON oficial en `https://www.congreso.es`) y qué voto
   equivale a «de acuerdo» (`sentido`). Para reproducir los datos desde cero:
@@ -60,8 +62,11 @@ problemas de seguridad, ver [`SECURITY.md`](SECURITY.md).
 ## Arquitectura
 
 ```
-src/content/novedades/*.md   ← una novedad por fichero (fuente de la verdad, versionada en git)
-src/content.config.ts        ← collection `novedades` (glob loader + esquema zod)
+Seed: /novedades/<slug>      ← una novedad por documento (fuente de la verdad, en vivienda-es.hyper.media)
+src/lib/seed.ts              ← cliente de solo lectura de la API pública del sitio Seed
+src/lib/seed-render.ts       ← render HMBlock → HTML (párrafos, listas, enlaces, negritas…)
+src/lib/seed-loader.ts       ← loader Astro: documentos Seed → collection `novedades` (esquema zod)
+src/content.config.ts        ← collection `novedades` (loader Seed + esquema zod)
 src/lib/fuentes.ts           ← lista de dominios oficiales admitidos en `fuente_url`
 src/pages/index.astro        ← feed cronológico inverso agrupado por día + filtros
 src/pages/novedades/[id].astro ← página de detalle por novedad
@@ -76,15 +81,22 @@ src/scripts/filtros.ts       ← filtrado en cliente (tipo/partido) sincronizado
 worker/index.ts              ← Worker: solo /api/* (respuestas anónimas del cuestionario en D1)
 worker/respuestas.ts         ← validación de respuestas, Turnstile, veda electoral y agregados
 scripts/fetch-votos-congreso.ts ← `bun run votos`: regenera src/data/votos-congreso.json
-scripts/validate-novedades.ts← validación + deduplicación (Bun) antes del build/commit
+scripts/validate-novedades.ts← validación + deduplicación (Bun) antes de publicar
+scripts/seed-publish.ts      ← publica/actualiza novedades en Seed vía seed-cli
+scripts/seed-list.ts         ← lista las novedades ya publicadas en Seed
 scripts/fetch-boe.ts         ← ayudante: ítems de vivienda del sumario del BOE (API de datos abiertos)
 .agents/daily-update.md      ← prompt de la actualización diaria (lo ejecuta una automation de Devin)
 .github/workflows/deploy.yml ← CI: test + typecheck + build en cada push y PR
 ```
 
 - **Astro estático** (`output: "static"`), Tailwind CSS v4 vía `@tailwindcss/vite`.
-- **Content collections**: cada `.md` se valida con zod en el build. `fuente_url` es obligatorio
-  (`z.string().url()`) y además debe ser `https` y de un dominio oficial; si no, **el build falla**.
+- **Seed como fuente de datos**: las novedades son documentos Seed de la cuenta
+  `hm://z6Mkpqer25JrVxzoMobHUCkCv1r4fhiqTWwPWGrhcdGQVHHw` (sitio
+  [vivienda-es.hyper.media](https://vivienda-es.hyper.media)); el loader las lee en el build con
+  el mismo esquema zod. `fuente_url` sigue exigiendo `https` y dominio oficial; si no, **el build
+  falla** (también si Seed no devuelve ninguna novedad).
+- **Comentarios**: cada novedad enlaza a su documento Seed, donde los lectores comentan tras
+  iniciar sesión con su Seed vault; la página los muestra vía `ListComments` en el navegador.
 - Mobile-first: una columna en móvil, filtros fijos arriba, objetivos táctiles ≥ 44 px; escala a
   escritorio con ancho de lectura limitado.
 - Cada tarjeta muestra fecha, tipo, partido/institución, título (enlazado a su página de detalle), resumen,
@@ -156,11 +168,12 @@ La lista exacta de dominios admitidos está en [`src/lib/fuentes.ts`](src/lib/fu
 
 1. Una **automation programada de Devin** se ejecuta cada mañana y sigue
    [`.agents/daily-update.md`](.agents/daily-update.md): consulta BOE, Congreso, Senado, Ministerio y
-   webs de partidos; extrae las novedades de vivienda desde la última fecha publicada; deduplica contra
-   `src/content/novedades/`; y crea los nuevos `.md` respetando el esquema.
-2. Ejecuta `bun run validate`, `bun test` y `bun run build`.
-3. Hace commit (`novedades: AAAA-MM-DD (N nuevas)`) y push a `main`.
-4. El push a `main` dispara el build y el despliegue en Cloudflare (Workers Builds).
+   webs de partidos; extrae las novedades de vivienda desde la última fecha publicada; deduplica
+   contra lo ya publicado (`bun run scripts/seed-list.ts`) y publica cada novedad como documento
+   Seed con `bun run scripts/seed-publish.ts` (valida el esquema antes de subir).
+2. Dispara el rebuild de la web: deploy hook de Cloudflare (`CF_DEPLOY_HOOK`) o, en su defecto,
+   un commit vacío en `main`.
+3. El build lee las novedades de Seed y despliega en Cloudflare (Workers Builds).
 
 Para lanzarla a mano: abre una sesión de Devin en este repo con el prompt
 “Sigue `.agents/daily-update.md`”.
