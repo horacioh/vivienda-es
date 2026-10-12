@@ -18,6 +18,7 @@ src/pages/index.astro        ← feed cronológico inverso agrupado por día + f
 src/pages/novedades/[id].astro ← página de detalle por novedad
 src/pages/rss.xml.ts         ← RSS con las 50 últimas
 src/scripts/filtros.ts       ← filtrado en cliente (tipo/partido) sincronizado con ?tipo=&partido=
+worker/index.ts              ← Worker: solo /api/* (respuestas anónimas del cuestionario en D1)
 scripts/validate-novedades.ts← validación + deduplicación (Bun) antes del build/commit
 scripts/fetch-boe.ts         ← ayudante: ítems de vivienda del sumario del BOE (API de datos abiertos)
 .agents/daily-update.md      ← prompt de la actualización diaria (lo ejecuta una automation de Devin)
@@ -67,11 +68,20 @@ Documentado en [`src/content/novedades/README.md`](src/content/novedades/README.
 
 ## Cuestionario «Elecciones 29N»
 
-`/elecciones` compara las respuestas del usuario con lo que votó cada partido en el Pleno del Congreso. Todo se calcula en el navegador; no se guarda nada.
+`/elecciones` compara las respuestas del usuario con lo que votó cada partido en el Pleno del Congreso. Todo se calcula en el navegador; solo se guarda algo si el usuario pulsa «Compartir de forma anónima».
 
 - `src/data/cuestionario.ts`: las afirmaciones, la votación (o votaciones) del Congreso que respalda cada una, qué voto equivale a «de acuerdo» (`sentido`) y los partidos comparados (`ACTORES`). Los partidos del Grupo Mixto se leen diputado a diputado.
 - `src/data/votos-congreso.json`: recuento por grupo y voto de los diputados del Mixto, generado desde los datos abiertos del Congreso con `bun run votos`. Vuelve a ejecutarlo al añadir o cambiar una votación.
 - `src/lib/cuestionario.ts`: postura de cada partido (+1 a favor, −1 en contra, 0 abstención; media si hay varias votaciones). La página explica el método y sus límites.
+
+### Respuestas anónimas («Qué responde la gente»)
+
+`worker/index.ts` atiende `/api/*`; el resto lo sirve `dist/` sin pasar por el Worker.
+
+- `POST /api/respuestas` con `{ "respuestas": { "<id afirmación>": [valor (-1|0|1), importa (0|1)] } }`. Se guarda en la tabla `envios` de D1 (binding `DB`) solo el día y las respuestas: sin IP, cookies ni identificador. La IP se usa en memoria para el rate limit (binding `LIMITE`, 5 envíos/min) y no se guarda. Cada envío lleva un token de Cloudflare Turnstile (`token`, acción `compartir`). El Worker lo comprueba con siteverify y exige `success`, la acción `compartir` y un `hostname` de `TURNSTILE_HOSTNAMES`. Sin `TURNSTILE_SECRET` no se acepta ningún envío, y desde los previews tampoco (su hostname no está en la lista), así que no escriben en la D1 de producción.
+- Turnstile: la clave pública está en `wrangler.jsonc` (`vars.TURNSTILE_SITEKEY`) y la secreta es un secret del Worker (Settings → Variables and Secrets → `TURNSTILE_SECRET`, tipo Secret). En local, `.dev.vars` (ignorado por git) puede usar las claves de prueba de Cloudflare: `TURNSTILE_SITEKEY=1x00000000000000000000AA`, `TURNSTILE_SECRET=1x0000000000000000000000000000000AA` y `TURNSTILE_HOSTNAMES=example.com`. Ojo: las claves de prueba no devuelven `action`, así que en local el envío acaba en 403; la lógica se prueba con `bun test worker`. La tabla se crea sola en la primera petición.
+- `GET /api/resultados` devuelve el recuento por afirmación. No da cifras con menos de 30 envíos (`MINIMO`) ni durante la veda de sondeos (LOREG art. 69.7: del 24 de noviembre al cierre de colegios del 29; `VEDA` en `worker/respuestas.ts`).
+- En local: `bun run build && bunx wrangler dev` (D1 local en `.wrangler/`).
 
 ## Fuentes oficiales
 
@@ -104,8 +114,9 @@ Para lanzarla a mano: abre una sesión de Devin en este repo con el prompt
 ### Cloudflare Workers Builds (por defecto)
 
 El repo está conectado al Worker `vivienda-es` con Workers Builds: cada push a `main` construye y
-publica, y cada PR genera un preview. `wrangler.jsonc` publica `dist/` como static assets (sin
-código de Worker). Configuración en el dashboard (Worker → Settings → Build):
+publica, y cada PR genera un preview. `wrangler.jsonc` publica `dist/` como static assets y el
+Worker `worker/index.ts` para `/api/*`, con la base de datos D1 `vivienda-es` (su ID va en
+`d1_databases[0].database_id`). Ojo: los previews usan la misma D1 que producción. Configuración en el dashboard (Worker → Settings → Build):
 
 - Build command: `bun run build`. Ya incluye `validate`, `bun test` y `astro check`, así que un
   commit que no pase los tests no se publica.
