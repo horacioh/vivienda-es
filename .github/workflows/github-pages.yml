@@ -1,6 +1,6 @@
 name: GitHub Pages (alternativa)
 
-# Alternativa a Cloudflare Pages. Para usarla: Settings → Pages → Source: "GitHub Actions"
+# Alternativa a Cloudflare Workers Builds. Para usarla: Settings → Pages → Source: "GitHub Actions"
 # y cambia `workflow_dispatch` por `push: { branches: [main] }`.
 # Publica en https://<usuario>.github.io/vivienda-es (SITE_URL/BASE_PATH abajo).
 

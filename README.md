@@ -3,10 +3,10 @@
 Novedades diarias sobre **vivienda en España** — leyes, aprobaciones, propuestas de los partidos y
 votaciones en el Parlamento — **siempre con enlace a la fuente oficial**.
 
-- Web: https://vivienda-es.pages.dev (Cloudflare Pages)
-- Filtros por URL: [`/?tipo=votacion`](https://vivienda-es.pages.dev/?tipo=votacion),
-  [`/?partido=Sumar`](https://vivienda-es.pages.dev/?partido=Sumar),
-  [`/?tipo=propuesta&partido=PP`](https://vivienda-es.pages.dev/?tipo=propuesta&partido=PP)
+- Web: https://vivienda-es.horacioh.workers.dev (Cloudflare Workers, static assets)
+- Filtros por URL: [`/?tipo=votacion`](https://vivienda-es.horacioh.workers.dev/?tipo=votacion),
+  [`/?partido=Sumar`](https://vivienda-es.horacioh.workers.dev/?partido=Sumar),
+  [`/?tipo=propuesta&partido=PP`](https://vivienda-es.horacioh.workers.dev/?tipo=propuesta&partido=PP)
 
 ## Arquitectura
 
@@ -86,27 +86,29 @@ La lista exacta de dominios admitidos está en [`src/lib/fuentes.ts`](src/lib/fu
    `src/content/novedades/`; y crea los nuevos `.md` respetando el esquema.
 2. Ejecuta `bun run validate`, `bun test` y `bun run build`.
 3. Hace commit (`novedades: AAAA-MM-DD (N nuevas)`) y push a `main`.
-4. El push a `main` dispara el build y el despliegue en Cloudflare Pages (integración Git).
+4. El push a `main` dispara el build y el despliegue en Cloudflare (Workers Builds).
 
 Para lanzarla a mano: abre una sesión de Devin en este repo con el prompt
 “Sigue `.agents/daily-update.md`”.
 
 ## Despliegue
 
-### Cloudflare Pages (por defecto)
+### Cloudflare Workers Builds (por defecto)
 
-El repo está conectado a Cloudflare Pages con la integración Git: cada push a `main` construye y
-publica, y cada PR genera un preview. Configuración del proyecto (Settings → Builds):
+El repo está conectado al Worker `vivienda-es` con Workers Builds: cada push a `main` construye y
+publica, y cada PR genera un preview. `wrangler.jsonc` publica `dist/` como static assets (sin
+código de Worker). Configuración en el dashboard (Worker → Settings → Build):
 
-- Build command: `bun run build`
-- Build output directory: `dist`
-- Variables de entorno (build): **`BUN_VERSION=1.4.3`** (obligatoria: la imagen de Cloudflare trae
-  Bun 1.2.15, que no lee el formato actual de `bun.lock`; Cloudflare solo acepta la versión de Bun por
-  variable, no por fichero). Opcional: `SITE_URL` si usas un dominio propio (por defecto
-  `https://vivienda-es.pages.dev`).
+- Build command: `bun run build`. Ya incluye `validate`, `bun test` y `astro check`, así que un
+  commit que no pase los tests no se publica.
+- Deploy command: `npx wrangler deploy` (el valor por defecto; sin flags como `--assets`, que
+  ignorarían `wrangler.jsonc`).
+- Variables de build: **`BUN_VERSION=1.4.3`** (obligatoria: la imagen de build trae Bun 1.2.15, que
+  no lee el formato actual de `bun.lock`, y Cloudflare solo acepta la versión de Bun por variable, no
+  por fichero). Opcional: `SITE_URL` si usas un dominio propio.
 
-`.github/workflows/deploy.yml` solo hace de CI (test + typecheck + build) en GitHub. Para publicar a
-mano sin la integración Git: `bun run build && bunx wrangler pages deploy dist --project-name=vivienda-es`.
+`.github/workflows/deploy.yml` solo hace de CI en GitHub. Para publicar a mano:
+`bun run build && bun run deploy`.
 
 ### GitHub Pages (alternativa)
 
