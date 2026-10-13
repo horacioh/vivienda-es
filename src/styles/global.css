@@ -77,6 +77,7 @@ body {
 .estado-aprobada { background: #e4f2e5; color: #23652a; }
 .estado-rechazada { background: #fbe5e2; color: #9a2c20; }
 .estado-caducada { background: #eeeae3; color: #6b645a; }
+.estado-derogada { background: #ede3e8; color: #6f2f4a; }
 
 .prose-novedad {
   font-size: 1.0625rem;

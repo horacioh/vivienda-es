@@ -41,7 +41,7 @@ const KEYWORDS = [
 // Solo se marca DESAJUSTE cuando chocan de verdad; in_force con aprobada o
 // sin estado es lo normal.
 const CONTRADICE: Record<string, string[]> = {
-  in_force: ["rechazada", "caducada"],
+  in_force: ["rechazada", "caducada", "derogada"],
   repealed: ["aprobada", "en-tramite", "propuesta"],
   annulled: ["aprobada", "en-tramite", "propuesta"],
 };
@@ -141,33 +141,38 @@ async function cmdReformas(desde?: string) {
 
 async function cmdEstados() {
   const docs = await listNovedadDocs();
-  const vistos = new Set<string>();
-  const ids = new Map<string, { slug: string; estadoDoc?: string; nombre: string }>();
+  // Varios documentos pueden compartir legalize_id (una ley, sus reformas y
+  // sus votaciones apuntan a la misma norma): se audita cada uno.
+  const porId = new Map<string, { slug: string; estadoDoc?: string }[]>();
+  const anota = (id: string, entrada: { slug: string; estadoDoc?: string }) => {
+    const lista = porId.get(id) ?? [];
+    lista.push(entrada);
+    porId.set(id, lista);
+  };
   for (const { id } of LEYES_VIGILADAS) {
-    ids.set(id, { slug: "(vigilada)", nombre: id });
+    anota(id, { slug: "(vigilada)" });
   }
   for (const d of docs) {
     const lid = d.metadata?.legalize_id;
     const slug = d.path?.replace(/^\/novedades\//, "") ?? "";
     if (typeof lid === "string" && lid) {
-      ids.set(lid, {
+      anota(lid, {
         slug,
         estadoDoc: typeof d.metadata?.estado === "string" ? d.metadata.estado : undefined,
-        nombre: typeof d.metadata?.titulo === "string" ? d.metadata.titulo : lid,
       });
     }
   }
-  for (const [id, info] of ids) {
-    if (vistos.has(id)) continue;
-    vistos.add(id);
+  for (const [id, entradas] of porId) {
     const data = (await lg(`/es/laws/${id}`)) as unknown as LawDetail | null;
     const status = (data?.status ?? data?.frontmatter?.status) as string | undefined;
     if (!status) {
-      console.log(`${id}\t(no indexada)\t${info.slug}`);
+      console.log(`${id}\t(no indexada)\t${entradas.map((e) => e.slug).join(", ")}`);
       continue;
     }
-    const marca = info.estadoDoc && (CONTRADICE[status] ?? []).includes(info.estadoDoc) ? "DESAJUSTE" : "ok";
-    console.log(`${marca}\t${id}\tstatus=${status}\testado_doc=${info.estadoDoc ?? "-"}\t${info.slug}`);
+    for (const info of entradas) {
+      const marca = info.estadoDoc && (CONTRADICE[status] ?? []).includes(info.estadoDoc) ? "DESAJUSTE" : "ok";
+      console.log(`${marca}\t${id}\tstatus=${status}\testado_doc=${info.estadoDoc ?? "-"}\t${info.slug}`);
+    }
   }
 }
 

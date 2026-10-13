@@ -56,7 +56,8 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
   `leyes-vigiladas.ts` y haz commit de ese cambio.
 - `estados` imprime `DESAJUSTE` cuando el `estado` de un documento Seed contradice el status real
   (p. ej. una ley derogada que sigue marcada como aprobada). Corrige el documento republicándolo
-  con el `estado` correcto (mismo slug = update).
+  con el `estado` correcto (mismo slug = update): una norma `repealed`/`annulled` en Legalize es
+  `derogada` aquí (o `rechazada`/`caducada` si fue por no convalidación de un RDL).
 - Legalize no cubre: votos por grupo/diputado (sigue el open data del Congreso), proposiciones
   BOCG que no llegan a norma, notas de prensa ni webs de partidos.
 - `fuente_url` sigue siendo siempre el enlace oficial (BOE, Congreso…), nunca legalize.dev: es el
@@ -126,7 +127,7 @@ resumen: "1–3 frases neutrales: qué es, qué cambia y en qué estado queda."
 tipo: ley            # ley | propuesta | votacion | aprobacion | otro
 partido: PSOE        # solo si la impulsa un partido/grupo: PSOE, PP, VOX, Sumar, ERC, Junts, EH Bildu, PNV, BNG, CC, UPN, Podemos, Grupo Mixto
 institucion: "Gobierno de España (Consejo de Ministros)"
-estado: en-tramite   # propuesta | en-tramite | aprobada | rechazada | caducada
+estado: en-tramite   # propuesta | en-tramite | aprobada | rechazada | caducada | derogada
 fuente_url: "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20823"
 fuente_nombre: "BOE núm. BOE-A-2026-20823"
 legalize_id: BOE-A-2026-20823   # opcional: se deriva de fuente_url si falta

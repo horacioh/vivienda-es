@@ -97,7 +97,6 @@ for (const info of publicados) {
   if (typeof m.fuente_url === "string") clavesSeed.set(`${normalizarUrl(m.fuente_url)}|${m.tipo}${votos}`, slug);
   const fecha = new Date(String(m.fecha ?? m.displayPublishTime)).toISOString().slice(0, 10);
   if (typeof m.titulo === "string") clavesSeed.set(`${fecha}|${slugify(m.titulo)}`, slug);
-  if (typeof m.legalize_id === "string" && m.legalize_id) clavesSeed.set(`lid:${m.legalize_id}`, slug);
 }
 for (const { nombre, contenido } of ficheros) {
   const slug = nombre.replace(/\.md$/, "");
@@ -110,7 +109,6 @@ for (const { nombre, contenido } of ficheros) {
   const candidatas = [
     `${normalizarUrl(String(fm.fuente_url))}|${fm.tipo}${votos}`,
     `${fecha}|${slugify(String(fm.titulo))}`,
-    ...(legalizeId(fm) ? [`lid:${legalizeId(fm)}`] : []),
   ];
   for (const clave of candidatas) {
     const previo = clavesSeed.get(clave);
