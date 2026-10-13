@@ -44,7 +44,9 @@ function init() {
     if (f.tipo) q.set("tipo", f.tipo);
     if (f.partido) q.set("partido", f.partido);
     const qs = q.toString();
-    history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+    // Preservar history.state: ClientRouter guarda ahí su índice de pila
+    // y ponerlo a null rompe la navegación atrás (popstate sin reconocer).
+    history.replaceState(history.state, "", qs ? `?${qs}` : location.pathname);
   };
   form.addEventListener("change", sync);
   form.addEventListener("submit", (e) => e.preventDefault());
