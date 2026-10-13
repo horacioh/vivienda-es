@@ -38,6 +38,32 @@ de Madrid), con una ventana de los últimos 14 días o la del paso 0 si es más 
 parada larga). Así, si falla un lunes, el siguiente cubre las dos semanas; la deduplicación del
 paso 2 evita repetir.
 
+**legalize.dev** (API con `LEGALIZE_API_KEY` en el entorno) es el respaldo estructurado del BOE y
+cubre además reformas y estado de cada norma. Úsalo **cada día** con estos ayudantes:
+
+```bash
+bun run scripts/fetch-legalize.ts nuevas <desde> [hasta]   # leyes ES de vivienda en la ventana
+bun run scripts/fetch-legalize.ts ley <BOE-A-...>          # metadatos completos de una norma
+bun run scripts/fetch-legalize.ts reformas [desde]         # reformas de las leyes vigiladas
+bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs estado publicado
+```
+
+- `nuevas` cruza con el BOE del paso 1: lo que encuentre uno y no el otro, revísalo a mano.
+- `reformas` lista cada reforma de `scripts/leyes-vigiladas.ts` con la ley origen y los artículos
+  afectados. Una reforma dentro de la ventana suele merecer una novedad propia («El RDL X/AAAA
+  modifica los artículos … de la Ley Y»): su `fuente_url` es el BOE de la ley origen (`source_id`).
+  Si una ley nueva de la ventana pasa a ser de las importantes de vivienda, añádela a
+  `leyes-vigiladas.ts` y haz commit de ese cambio.
+- `estados` imprime `DESAJUSTE` cuando el `estado` de un documento Seed contradice el status real
+  (p. ej. una ley derogada que sigue marcada como aprobada). Corrige el documento republicándolo
+  con el `estado` correcto (mismo slug = update): una norma `repealed`/`annulled` en Legalize es
+  `derogada` aquí (o `rechazada`/`caducada` si fue por no convalidación de un RDL).
+- Legalize no cubre: votos por grupo/diputado (sigue el open data del Congreso), proposiciones
+  BOCG que no llegan a norma, notas de prensa ni webs de partidos.
+- `fuente_url` sigue siendo siempre el enlace oficial (BOE, Congreso…), nunca legalize.dev: es el
+  backend de datos, no una fuente citable. Guarda el `BOE-A-*` de la norma en el campo
+  `legalize_id` del frontmatter (o déjalo vacío: el publicador lo deriva de la `fuente_url`).
+
 1. **BOE** — https://www.boe.es
    - Ayudante: `bun run scripts/fetch-boe.ts <desde AAAA-MM-DD> <hasta AAAA-MM-DD>` lista los
      ítems del sumario (API `https://www.boe.es/datosabiertos/api/boe/sumario/AAAAMMDD`) cuyo
@@ -101,9 +127,10 @@ resumen: "1–3 frases neutrales: qué es, qué cambia y en qué estado queda."
 tipo: ley            # ley | propuesta | votacion | aprobacion | otro
 partido: PSOE        # solo si la impulsa un partido/grupo: PSOE, PP, VOX, Sumar, ERC, Junts, EH Bildu, PNV, BNG, CC, UPN, Podemos, Grupo Mixto
 institucion: "Gobierno de España (Consejo de Ministros)"
-estado: en-tramite   # propuesta | en-tramite | aprobada | rechazada | caducada
+estado: en-tramite   # propuesta | en-tramite | aprobada | rechazada | caducada | derogada
 fuente_url: "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20823"
 fuente_nombre: "BOE núm. BOE-A-2026-20823"
+legalize_id: BOE-A-2026-20823   # opcional: se deriva de fuente_url si falta
 ---
 
 Contexto opcional (Markdown). Solo hechos que figuren en la fuente oficial.

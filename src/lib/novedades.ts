@@ -1,7 +1,7 @@
 export const TIPOS = ["ley", "propuesta", "votacion", "aprobacion", "otro"] as const;
 export type Tipo = (typeof TIPOS)[number];
 
-export const ESTADOS = ["propuesta", "en-tramite", "aprobada", "rechazada", "caducada"] as const;
+export const ESTADOS = ["propuesta", "en-tramite", "aprobada", "rechazada", "caducada", "derogada"] as const;
 export type Estado = (typeof ESTADOS)[number];
 
 export const TIPO_LABEL: Record<Tipo, string> = {
@@ -18,6 +18,7 @@ export const ESTADO_LABEL: Record<Estado, string> = {
   aprobada: "Aprobada",
   rechazada: "Rechazada",
   caducada: "Caducada",
+  derogada: "Derogada",
 };
 
 export const NOMBRE_FICHERO = /^(\d{4}-\d{2}-\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/;

@@ -26,6 +26,12 @@ export const novedadSchema = z.object({
     .url()
     .refine(esFuenteOficial, "fuente_url debe ser https y de un dominio oficial (src/lib/fuentes.ts)"),
   fuente_nombre: z.string().min(1),
+  // Identificador BOE-A-* de la norma, si aplica: lo usa scripts/fetch-legalize.ts
+  // para seguir reformas y estado vía legalize.dev.
+  legalize_id: z
+    .string()
+    .regex(/^BOE-[A-Z]-\d{4}-\d+$/, "legalize_id debe ser un identificador BOE-A-*")
+    .optional(),
   resultado: z
     .object({
       si: z.number().int().nonnegative(),

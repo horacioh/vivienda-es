@@ -39,6 +39,14 @@ if (fileIdx >= 0) {
 
 const errores = validarNovedades(ficheros);
 
+// Identificador de la norma en legalize.dev (y en el BOE): viene del
+// frontmatter o se deriva de una fuente_url del tipo boe.es/...?id=BOE-A-*.
+const legalizeId = (fm: Record<string, unknown>): string | undefined => {
+  if (typeof fm.legalize_id === "string" && fm.legalize_id) return fm.legalize_id;
+  const url = typeof fm.fuente_url === "string" ? fm.fuente_url : "";
+  return /[?&]id=(BOE-[A-Z]-\d{4}-\d+)/.exec(url)?.[1];
+};
+
 // El validador replica el esquema a mano; además se aplica el esquema zod real
 // a los campos tal como los verá el loader (objetos viajan como JSON en los
 // metadatos). Sin esto, un `resultado` o `votos_por_grupo` mal formado se
@@ -66,6 +74,7 @@ for (const { nombre, contenido } of ficheros) {
     estado: fm.estado,
     fuente_url: fm.fuente_url,
     fuente_nombre: fm.fuente_nombre,
+    legalize_id: legalizeId(fm),
     resultado: jsonAttr(fm.resultado),
     votos_por_grupo: jsonAttr(fm.votos_por_grupo),
   });
@@ -104,6 +113,28 @@ for (const { nombre, contenido } of ficheros) {
   for (const clave of candidatas) {
     const previo = clavesSeed.get(clave);
     if (previo && previo !== slug) errores.push(`${nombre}: duplicada en Seed con el documento /novedades/${previo}`);
+  }
+}
+
+// Con LEGALIZE_API_KEY en el entorno, comprueba que cada legalize_id existe en
+// legalize.dev antes de publicarlo como metadato (un id erróneo rompería el
+// seguimiento de reformas y estado de scripts/fetch-legalize.ts).
+if (process.env.LEGALIZE_API_KEY) {
+  const ids = new Set<string>();
+  for (const { contenido } of ficheros) {
+    const fm = YAML.parse(/^---\n([\s\S]*?)\n---\n/.exec(contenido)?.[1] ?? "{}") as Record<string, unknown>;
+    const id = legalizeId(fm);
+    if (id) ids.add(id);
+  }
+  for (const id of ids) {
+    const res = await fetch(`https://legalize.dev/api/v1/es/laws/${id}`, {
+      headers: { authorization: `Bearer ${process.env.LEGALIZE_API_KEY}` },
+    });
+    if (res.status === 404) {
+      errores.push(`legalize_id ${id} no existe en legalize.dev`);
+    } else if (!res.ok) {
+      console.warn(`aviso: legalize.dev respondió ${res.status} para ${id}; no se pudo comprobar`);
+    }
   }
 }
 
@@ -158,6 +189,7 @@ try {
       estado: fm.estado,
       fuente_url: fm.fuente_url,
       fuente_nombre: fm.fuente_nombre,
+      legalize_id: legalizeId(fm),
       fecha,
       resultado: escalar(fm.resultado),
       votos_por_grupo: escalar(fm.votos_por_grupo),
