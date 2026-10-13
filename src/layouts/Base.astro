@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 
 interface Props {
@@ -29,10 +30,11 @@ const documentTitle = title === "Vivienda ES" ? title : `${title} · Vivienda ES
     <meta property="og:title" content={documentTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="Vivienda ES" />
+    <ClientRouter />
   </head>
   <body class="flex min-h-dvh flex-col border-t-[3px] border-accent">
     <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-card focus:px-3 focus:py-2 focus:shadow-card">Saltar al contenido</a>
-    <header>
+    <header transition:name="site-header">
       <div class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <a href={`${base}/`} class="flex min-h-11 items-center gap-2.5 text-ink">
           <span aria-hidden="true" class="grid size-8 place-items-center rounded-[9px] bg-accent text-white shadow-[inset_0_-1px_0_rgb(0_0_0/0.18)]">
@@ -50,10 +52,10 @@ const documentTitle = title === "Vivienda ES" ? title : `${title} · Vivienda ES
         </nav>
       </div>
     </header>
-    <main id="contenido" class="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 sm:px-6">
+    <main id="contenido" class="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 sm:px-6" transition:animate="fade">
       <slot />
     </main>
-    <footer class="border-t border-line bg-card/60">
+    <footer class="border-t border-line bg-card/60" transition:name="site-footer">
       <div class="mx-auto grid max-w-5xl gap-6 px-4 py-10 text-sm sm:grid-cols-[1fr_auto] sm:px-6">
         <div>
           <p class="font-display text-lg font-semibold tracking-tight">Vivienda ES</p>

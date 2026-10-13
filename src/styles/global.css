@@ -26,6 +26,33 @@
   --color-votacion: #0e7686;
   --color-aprobacion: #2f7d32;
   --color-otro: #6b645a;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Entrada escalonada (fade + rise); --i es el índice del elemento. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.rise {
+  animation: rise 520ms var(--ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 14) * 35ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 html {

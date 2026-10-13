@@ -2,6 +2,8 @@
 // Seed correspondiente vía la API pública del sitio y los pinta en el DOM.
 // Escribir se hace en la página del documento en Seed, donde los usuarios
 // inician sesión con su Seed vault.
+// Con ClientRouter el módulo solo se ejecuta una vez: el arranque va en
+// astro:page-load y cada navegación trae un contenedor nuevo.
 import { renderBloques } from "../lib/seed-render";
 import type { SeedComment } from "../lib/seed";
 
@@ -9,8 +11,9 @@ interface AutorMeta {
   metadata?: { name?: string; icon?: string };
 }
 
-const cont = document.getElementById("comentarios");
-if (cont) {
+function init() {
+  const cont = document.getElementById("comentarios");
+  if (!cont) return;
   const target = cont.dataset.target;
   const docUrl = cont.dataset.docUrl;
   const apiOrigin = cont.dataset.apiOrigin;
@@ -56,3 +59,5 @@ if (cont) {
       `No se pudieron cargar los comentarios. <a href="${docUrl}" target="_blank" rel="noopener">Verlos en Seed →</a>`;
   });
 }
+
+document.addEventListener("astro:page-load", init);
