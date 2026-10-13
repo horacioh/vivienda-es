@@ -51,6 +51,7 @@ export function novedadesSeedLoader(): Loader {
             estado: m.estado,
             fuente_url: m.fuente_url,
             fuente_nombre: m.fuente_nombre,
+            legalize_id: m.legalize_id,
             resultado: jsonAttr(m.resultado),
             votos_por_grupo: jsonAttr(m.votos_por_grupo),
           },
