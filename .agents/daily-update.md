@@ -38,6 +38,14 @@ de Madrid), con una ventana de los últimos 14 días o la del paso 0 si es más 
 parada larga). Así, si falla un lunes, el siguiente cubre las dos semanas; la deduplicación del
 paso 2 evita repetir.
 
+Los MCP `reforma-digital-congreso-323f`, `reforma-digital-boe-f369` y `reforma-digital-ine-08b0`
+(endpoints `https://reforma-digital.es/mcp/<nombre>`, con `<nombre>` = `congreso`, `boe` o `ine`,
+sin el sufijo del servidor instalado) son un proyecto no oficial de terceros sobre datos
+oficiales: **solo sirven para descubrir información, nunca como fuente citable**. Contrasta cada
+dato con la fuente oficial antes de publicar; `fuente_url` debe ser la URL oficial (BOE,
+congreso.es, ine.es), nunca la del MCP. Si no están disponibles en la sesión, sigue con los
+scripts y el flujo habitual, sin fallar la ejecución.
+
 **legalize.dev** (API con `LEGALIZE_API_KEY` en el entorno) es el respaldo estructurado del BOE y
 cubre además reformas y estado de cada norma. Úsalo **cada día** con estos ayudantes:
 
@@ -71,6 +79,9 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
      urbanismo, etc. Por defecto ya descarta la sección II (nombramientos, oposiciones), la V
      (anuncios, contratación) salvo extractos de convocatorias de ayudas, y los recursos de la
      DGSJFP contra calificaciones registrales; añade `--todo` solo si sospechas que falta algo.
+   - MCP `reforma-digital-boe-f369`: respaldo si falla boe.es o `fetch-boe.ts` (`sumario_boe`,
+     `buscar_legislacion`, `indice_norma`); `ver_bloque` permite leer artículos consolidados para
+     contexto. `fetch-boe.ts` + legalize.dev siguen siendo la vía principal.
    - El filtro es amplio a propósito: **revisa cada ítem** y quédate solo con lo relevante para la
      política de vivienda (leyes, reales decretos-leyes, reales decretos, leyes autonómicas,
      ayudas, planes, resoluciones de las Cortes). Descarta oposiciones, nombramientos, anuncios de
@@ -86,6 +97,10 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
      `ProposicionesDeLey__*.json` (campo `AUTOR` = grupo parlamentario, `ENLACESBOCG` = PDF
      oficial del BOCG). Busca nuevas proposiciones de ley de vivienda y cambios de
      `SITUACIONACTUAL`.
+   - MCP `reforma-digital-congreso-323f`: complementa los datos abiertos y las notas de prensa para
+     desglosar votos por grupo/diputado (`buscar_votaciones`, `ver_votacion`) y encontrar preguntas
+     parlamentarias sobre vivienda en la ventana (`buscar_preguntas`). Para explorar el catálogo
+     y las sesiones: `indice_congreso`, `buscar_sesiones`, `ver_sesion`, `ver_conjunto`.
 3. **Senado** (solo lunes) — https://www.senado.es (actividad parlamentaria, iniciativas y
    votaciones). Desde la VM de Devin suele devolver 403 incluso con User-Agent; si es así, sáltalo.
 4. **Ministerio de Vivienda y Agenda Urbana** —
@@ -95,6 +110,11 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
 5. **Partidos políticos** (solo lunes) — solo sus webs oficiales (dominios en `src/lib/fuentes.ts`):
    propuestas o programas de vivienda publicados en el periodo. Prefiere siempre el documento
    parlamentario (BOCG) si la propuesta está registrada en el Congreso o el Senado.
+
+**INE** (solo si una novedad lo necesita) — MCP `reforma-digital-ine-08b0`: `buscar_operacion`,
+`buscar_tabla`, `datos_tabla`, `datos_serie` para localizar el último dato oficial pertinente
+(p. ej. Índice de Precios de Vivienda o alquiler). Compruébalo y cita la página de ine.es;
+no hagas volcados genéricos de datos.
 
 **Parada temprana:** si tras revisar las fuentes del día no hay ningún candidato nuevo ni cambio
 de estado, termina ya con el resumen (sin publicar nada ni disparar rebuild).
