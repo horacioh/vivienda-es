@@ -38,8 +38,9 @@ de Madrid), con una ventana de los últimos 14 días o la del paso 0 si es más 
 parada larga). Así, si falla un lunes, el siguiente cubre las dos semanas; la deduplicación del
 paso 2 evita repetir.
 
-Los MCP `reforma-digital-congreso`, `reforma-digital-boe` y `reforma-digital-ine`
-(`https://reforma-digital.es/mcp/<nombre>`) son un proyecto no oficial de terceros sobre datos
+Los MCP `reforma-digital-congreso-323f`, `reforma-digital-boe-f369` y `reforma-digital-ine-08b0`
+(endpoints `https://reforma-digital.es/mcp/<nombre>`, con `<nombre>` = `congreso`, `boe` o `ine`,
+sin el sufijo del servidor instalado) son un proyecto no oficial de terceros sobre datos
 oficiales: **solo sirven para descubrir información, nunca como fuente citable**. Contrasta cada
 dato con la fuente oficial antes de publicar; `fuente_url` debe ser la URL oficial (BOE,
 congreso.es, ine.es), nunca la del MCP. Si no están disponibles en la sesión, sigue con los
@@ -78,7 +79,7 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
      urbanismo, etc. Por defecto ya descarta la sección II (nombramientos, oposiciones), la V
      (anuncios, contratación) salvo extractos de convocatorias de ayudas, y los recursos de la
      DGSJFP contra calificaciones registrales; añade `--todo` solo si sospechas que falta algo.
-   - MCP `reforma-digital-boe`: respaldo si falla boe.es o `fetch-boe.ts` (`sumario_boe`,
+   - MCP `reforma-digital-boe-f369`: respaldo si falla boe.es o `fetch-boe.ts` (`sumario_boe`,
      `buscar_legislacion`, `indice_norma`); `ver_bloque` permite leer artículos consolidados para
      contexto. `fetch-boe.ts` + legalize.dev siguen siendo la vía principal.
    - El filtro es amplio a propósito: **revisa cada ítem** y quédate solo con lo relevante para la
@@ -96,7 +97,7 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
      `ProposicionesDeLey__*.json` (campo `AUTOR` = grupo parlamentario, `ENLACESBOCG` = PDF
      oficial del BOCG). Busca nuevas proposiciones de ley de vivienda y cambios de
      `SITUACIONACTUAL`.
-   - MCP `reforma-digital-congreso`: complementa los datos abiertos y las notas de prensa para
+   - MCP `reforma-digital-congreso-323f`: complementa los datos abiertos y las notas de prensa para
      desglosar votos por grupo/diputado (`buscar_votaciones`, `ver_votacion`) y encontrar preguntas
      parlamentarias sobre vivienda en la ventana (`buscar_preguntas`). Para explorar el catálogo
      y las sesiones: `indice_congreso`, `buscar_sesiones`, `ver_sesion`, `ver_conjunto`.
@@ -110,7 +111,7 @@ bun run scripts/fetch-legalize.ts estados                  # estado Legalize vs 
    propuestas o programas de vivienda publicados en el periodo. Prefiere siempre el documento
    parlamentario (BOCG) si la propuesta está registrada en el Congreso o el Senado.
 
-**INE** (solo si una novedad lo necesita) — MCP `reforma-digital-ine`: `buscar_operacion`,
+**INE** (solo si una novedad lo necesita) — MCP `reforma-digital-ine-08b0`: `buscar_operacion`,
 `buscar_tabla`, `datos_tabla`, `datos_serie` para localizar el último dato oficial pertinente
 (p. ej. Índice de Precios de Vivienda o alquiler). Compruébalo y cita la página de ine.es;
 no hagas volcados genéricos de datos.
